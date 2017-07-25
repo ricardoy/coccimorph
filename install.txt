@@ -1,0 +1,3 @@
+conda create --name coccimorph biopython
+source activate coccimorph
+python -m ipykernel install --name coccimorph --user
