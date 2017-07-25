@@ -11,15 +11,24 @@ class Segmentator(object):
         self.vx = []
         self.vy = []
         self.checkpoint = 0
+        self.invert = [
+            [0, 4],
+            [1, 5],
+            [2, 6],
+            [3, 7],
+            [4, 0],
+            [5, 1],
+            [6, 2],
+            [7, 3]
+        ]
 
-    def save_segmentation(self):
+    def save_segmentation(self, filename='/tmp/b.png'):
         img = np.copy(self.img)
         for x, y in zip(self.vx, self.vy):
             img[x, y] = 255
-        cv2.imwrite('/tmp/b.png', img)
+        cv2.imwrite(filename, img)
 
     def get_contour(self):
-        n = 1
         fim = False
         self.checkpoint = 0
 
@@ -34,12 +43,12 @@ class Segmentator(object):
                 j += 1
             i += 1
 
-        if i >= self.width or j >= self.height:
+        if i >= self.height or j >= self.width:
             self.vx.append(0)
             self.vy.append(0)
 
         if self.vx[0] > 1 and self.vy[0] > 1 and \
-            self.vy[0] < self.height-1 and self.vx[0] < self.width-1:
+            self.vx[0] < self.height-1 and self.vy[0] < self.width-1:
             n = 2
 
             x4 = self.vx[0]
@@ -52,7 +61,6 @@ class Segmentator(object):
             y7 = self.vy[0]+1
             x0 = self.vx[0]
             y0 = self.vy[0]+1
-            dpc = None
             dcn = 0
 
             next_pixel = (0, 0)
@@ -74,7 +82,7 @@ class Segmentator(object):
                 self.vy.append(int(next_pixel[1]))
                 dpc = dcn
 
-                w_vect = (next_pixel[0], next_pixel[1], dcn)
+                # w_vect = (next_pixel[0], next_pixel[1], dcn)
                 retvals = self.find_next(self.vx[-1], self.vy[-1], dpc)
                 next_pixel = (retvals[0], retvals[1])
                 dcn = retvals[2]
@@ -91,30 +99,16 @@ class Segmentator(object):
                         i += 1
 
     def find_next(self, pcx: int, pcy: int, dpc: int):
-        w2 = np.zeros(3)
-        invert = np.array([
-            [0, 4],
-            [1, 5],
-            [2, 6],
-            [3, 7],
-            [4, 0],
-            [5, 1],
-            [6, 2],
-            [7, 3]
-        ])
-        if type(dpc) != int:
-            dpc = int(dpc)
-        dcp = invert[dpc, 1]
-        dE = None
-        dI = None
+        w2 = np.zeros(3, dtype=np.int)
+        dcp = self.invert[dpc][1]
         for r in range(7):
             dE = (dcp + r) % 8
             dI = (dcp + r + 1) % 8
-            PE = self.chainpoint(pcx, pcy, dE)
-            PI = self.chainpoint(pcx, pcy, dI)
-            if self.is_background(PE) and self.is_object(PI):
-                w2[0] = PE[0]
-                w2[1] = PE[1]
+            pe = self.chainpoint(pcx, pcy, dE)
+            pi = self.chainpoint(pcx, pcy, dI)
+            if self.is_background(pe) and self.is_object(pi):
+                w2[0] = pe[0]
+                w2[1] = pe[1]
                 w2[2] = dE
         return w2
 
@@ -125,24 +119,22 @@ class Segmentator(object):
         return self.img_bin[pi[0], pi[1]] == 255
 
     def chainpoint(self, pcx, pcy, d):
-        pcx = int(pcx)
-        pcy = int(pcy)
         if d == 0:
-            return (pcx, pcy+1)
+            return pcx, pcy+1
         elif d == 1:
-            return (pcx-1, pcy+1)
+            return pcx-1, pcy+1
         elif d == 2:
-            return (pcx-1, pcy)
+            return pcx-1, pcy
         elif d == 3:
-            return (pcx-1, pcy-1)
+            return pcx-1, pcy-1
         elif d == 4:
-            return (pcx, pcy-1)
+            return pcx, pcy-1
         elif d == 5:
-            return (pcx+1, pcy-1)
+            return pcx+1, pcy-1
         elif d == 6:
-            return (pcx+1, pcy)
+            return pcx+1, pcy
         elif d == 7:
-            return (pcx+1, pcy+1)
+            return pcx+1, pcy+1
         else:
             raise ValueError('Parameter d should be an integer in [0, 7].')
 
