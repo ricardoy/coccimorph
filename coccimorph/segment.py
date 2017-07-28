@@ -28,7 +28,7 @@ class Segmentator(object):
             img[x, y] = 255
         cv2.imwrite(filename, img)
 
-    def get_contour(self):
+    def process_contour(self):
         fim = False
         self.checkpoint = 0
 
@@ -158,7 +158,7 @@ def load_image(filename, scale):
 
 def segment(filename, threshold, scale=None):
     seg = Segmentator(filename, threshold, scale)
-    seg.get_contour()
+    seg.process_contour()
     cv2.imwrite('/tmp/a.png', seg.img_bin)
     seg.save_segmentation()
 
