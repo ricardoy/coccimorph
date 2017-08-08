@@ -1,24 +1,29 @@
 from coccimorph.segment import Segmentator
 from coccimorph.functions import fftderiv, entropy
-from coccimorph.content import FeatureExtractor
+from coccimorph.content import FeatureExtractor, ClassificaGauss
 import argparse
 import numpy as np
 
 
+def printf(label, num):
+    print('%s %.3e'%(label, num))
+
 def output_xvector(xvector):
-    print('Mean of curvature:', xvector[0])
-    print('Standard deviation from curvature:', xvector[1])
-    print('Entropy of curvature:', xvector[2])
-    print('Largest diameter:', xvector[3])
-    print('Smallest diameter:', xvector[4])
-    print('Symmetry based on first principal component:', xvector[5])
-    print('Symmetry based on second principal component:', xvector[6])
-    print('Total number of pixels:', xvector[7])
-    print('Entropy of image content:', xvector[8])
-    print('Angular second moment from co-occurrence matrix:', xvector[9])
-    print('Contrast from co-occurrence matrix:', xvector[10])
-    print('Inverse difference moment from co-occurrence matrix:', xvector[11])
-    print('Entropy of co-occurence matrix:', xvector[12])
+    print()
+    printf('Mean of curvature:', xvector[0])
+    printf('Standard deviation from curvature:', xvector[1])
+    printf('Entropy of curvature:', xvector[2])
+    printf('Largest diameter:', xvector[3])
+    printf('Smallest diameter:', xvector[4])
+    printf('Symmetry based on first principal component:', xvector[5])
+    printf('Symmetry based on second principal component:', xvector[6])
+    printf('Total number of pixels:', xvector[7])
+    printf('Entropy of image content:', xvector[8])
+    printf('Angular second moment from co-occurrence matrix:', xvector[9])
+    printf('Contrast from co-occurrence matrix:', xvector[10])
+    printf('Inverse difference moment from co-occurrence matrix:', xvector[11])
+    printf('Entropy of co-occurence matrix:', xvector[12])
+    print()
 
 
 def predict(filename, threshold, scale=None):
@@ -28,8 +33,8 @@ def predict(filename, threshold, scale=None):
     f1 = seg.vx
     f2 = seg.vy
 
-    print(f1)
-    print(f2)
+    # print(f1)
+    # print(f2)
 
     n = len(f1)
     sigma = 10
@@ -57,14 +62,17 @@ def predict(filename, threshold, scale=None):
     xvector.append(feature_extractor.less_diameter)
     xvector.append(feature_extractor.sym_high_pc)
     xvector.append(feature_extractor.sym_less_pc)
-    xvector.append(feature_extractor.obj_size)
+    xvector.append(feature_extractor.obj_size) # problema
     xvector.append(feature_extractor.obj_entropy)
     xvector.append(feature_extractor.mcc_asm())
-    xvector.append(feature_extractor.mcc_con())
+    xvector.append(feature_extractor.mcc_con()) # problema
     xvector.append(feature_extractor.mcc_idf())
     xvector.append(feature_extractor.mcc_ent())
 
     output_xvector(xvector)
+
+    classifier = ClassificaGauss()
+    classifier.classify(xvector)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Similarity classifier.')

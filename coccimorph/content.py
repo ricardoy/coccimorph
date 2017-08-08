@@ -1,4 +1,6 @@
+import math
 import numpy as np
+import pandas as pd
 from coccimorph.segment import load_image
 
 
@@ -166,6 +168,10 @@ class FeatureExtractor:
         ima4a = np.zeros((highX1, 500), dtype=np.int)
         ima4b = np.zeros((highX2, 500), dtype=np.int)
 
+        # print('ima2b.shape', ima2b.shape)
+        # print('n', n)
+        # print('max vx', np.max(self.vx))
+        # print('max vy', np.max(self.vy))
         for i in range(n):
             ima2a[int(self.vx[i]), int(self.vy[i])] = 1
             ima2b[int(self.vx[i]), int(self.vy[i])] = 1
@@ -295,10 +301,10 @@ class FeatureExtractor:
         cx = int(np.average(f1))
         cy = int(np.average(f2))
 
-        print(len(f1))
-        print(len(f2))
-        print('cx:', cx)
-        print('cy:', cy)
+        # print(len(f1))
+        # print(len(f2))
+        # print('cx:', cx)
+        # print('cy:', cy)
 
         self.ima[cx][cy] = int(np.average(self.img[cx, cy]))
         sm += self.ima[cx][cy] * np.log(self.ima[cx][cy])
@@ -309,9 +315,9 @@ class FeatureExtractor:
         self.wEnt = np.zeros(256, dtype=np.float)
         sw2 = 0
 
-        print('x: ', x_min, x_max, "y:", y_min, y_max)
-
-        print('size vx:', len(self.vx))
+        # print('x: ', x_min, x_max, "y:", y_min, y_max)
+        #
+        # print('size vx:', len(self.vx))
 
         k = 0
         while k < len(self.vx):
@@ -338,8 +344,8 @@ class FeatureExtractor:
             self.obj_entropy = 0.0
             self.obj_size = 0.0
 
-        print('entropy:', self.obj_entropy)
-        print('size:', self.obj_size)
+        # print('entropy:', self.obj_entropy)
+        # print('size:', self.obj_size)
 
     def contour_and_entropy(self, i, j):
         if self.ima[i, j] == 0:
@@ -348,3 +354,74 @@ class FeatureExtractor:
             self.ima[i, j] = self.img_gray[i, j]
             self.wEnt[self.ima[i, j]] = 1 + self.wEnt[self.ima[i, j]]
 
+
+class ClassificaGauss(object):
+    def __init__(self, basedir='/opt/coccimorph/prototypes/'):
+        self.kl = []
+        for i in range(1, 8):
+            filename = 'kl9596_%d.txt'%(i)
+            self.kl.append(read_csv(basedir, filename))
+        self.ml_w = read_csv(basedir, 'ml9596.txt')
+
+        # print('ml shape:', self.ml_w.shape)
+
+        self.acerto_medio = [25.637479, 26.916101, 25.665415, 27.480373, 25.245048, 25.213264, 25.585858]
+        self.pw = [0.14285, 0.14285, 0.14285, 0.14285, 0.14285, 0.14285, 0.14285]
+        self.species = [
+            'E. acervulina',
+            'E. maxima',
+            'E. brunetti',
+            'E. mitis',
+            'E. praecox',
+            'E. tenella',
+            'E. necatrix'
+        ]
+
+    def classify(self, x):
+        class_density_value = []
+        for i, kl_w in enumerate(self.kl):
+            class_density_value.append(self.find_class_density(x, kl_w, i+1))
+
+        taxa_acerto = np.zeros(7, dtype=np.float)
+        for i in range(7):
+            if class_density_value[i] > 0.0:
+               taxa_acerto[i] = class_density_value[i]*100./self.acerto_medio[i]
+
+        for i in reversed(np.argsort(taxa_acerto)):
+            if taxa_acerto[i] > 0.0:
+                print('%s: %.4f'%(self.species[i],taxa_acerto[i]))
+
+    def find_class_density(self, x, kl_w, w_especie):
+        gx = .0
+
+        if not math.isclose(np.linalg.det(kl_w), 0): # det(kl_w) != 0.0
+            mx = np.zeros((1, 13), dtype=np.float)
+            mxt = np.zeros((13, 1), dtype=np.float)
+            for i in range(13):
+                mx[0, i] = x[i] - self.ml_w[w_especie-1, i]
+                mxt[i, 0] = x[i] - self.ml_w[w_especie-1, i]
+            mx_inv = np.dot(mx, np.linalg.inv(kl_w))
+            mx_inv_mx = np.dot(mx_inv, mxt)
+
+            # print('mx shape', mx.shape)
+            # print('inv shape', np.linalg.inv(kl_w).shape)
+            # print('mx_inv', mx_inv.shape)
+            #
+            # print('x', x)
+            # print('mx', mx)
+
+            aa = mx_inv_mx[0, 0]
+            bb = np.linalg.det(kl_w)
+            cc = np.log(bb)
+
+            # print ('aa:', aa, ' bb:', bb, ' cc:', cc)
+            gx = (-0.5) * aa - (0.5 * cc)
+            if not math.isclose(self.pw[w_especie-1], 0.0):
+                gx = gx + np.log(self.pw[w_especie-1])
+
+        # print('gx: ', gx)
+        return gx
+
+
+def read_csv(basedir, filename):
+    return pd.read_csv('%s/%s'%(basedir, filename), sep='\s+', header=None).as_matrix()

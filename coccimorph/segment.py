@@ -26,7 +26,7 @@ class Segmentator(object):
         img = np.copy(self.img)
         for x, y in zip(self.vx, self.vy):
             img[x, y] = 255
-        cv2.imwrite(filename, img)
+        cv2.imwrite(filename, np.transpose(img, axes=[1, 0, 2]))
 
     def process_contour(self):
         fim = False
@@ -153,13 +153,13 @@ def load_image(filename, scale):
         width = int(width / (scale / 11.))
         height = int(height / (scale / 11.))
         img = cv2.resize(img, (width, height))
-    return img
+    return np.transpose(img, axes=[1, 0, 2])
 
 
 def segment(filename, threshold, scale=None):
     seg = Segmentator(filename, threshold, scale)
     seg.process_contour()
-    cv2.imwrite('/tmp/a.png', seg.img_bin)
+    cv2.imwrite('/tmp/a.png', np.transpose(seg.img_bin, axes=[1, 0]))
     seg.save_segmentation()
 
 
