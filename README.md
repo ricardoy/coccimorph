@@ -1,6 +1,6 @@
 # COCCIMORPH
 
-This is a pure Python 3 implementation of [COCCIMORPH](http://www.coccidia.icb.usp.br/coccimorph/), a system for the automatic diagnosis of *Coccidia* using morphological characteristics. A test dataset for *Eimeria* species for domestic fowl can be found [here](http://www.coccidia.icb.usp.br/uploadoocyst/coccimorph/tutorials/SevenSpeciesFowl.zip) and for domestic rabbit can be downloaded [here](http://www.coccidia.icb.usp.br/uploadoocyst/coccimorph/tutorials/ElevenSpeciesRabbit.zip).
+This is a pure Python 3 implementation of [COCCIMORPH](http://www.coccidia.icb.usp.br/coccimorph/), a system for the automatic diagnosis of *Coccidia* using morphological characteristics. A test dataset for *Eimeria* species for domestic fowl can be found [here](http://www.coccidia.icb.usp.br/uploadoocyst/coccimorph/tutorials/SevenSpeciesFowl.zip).
 
 ## Installation
 
