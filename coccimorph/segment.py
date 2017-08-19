@@ -22,17 +22,19 @@ class Segmentator(object):
             [7, 3]
         ]
 
-    def save_segmentation(self, filename='/tmp/b.png'):
+    def save_segmentation(self, filename):
         img = np.copy(self.img)
         for x, y in zip(self.vx, self.vy):
             img[x, y] = 255
         cv2.imwrite(filename, np.transpose(img, axes=[1, 0, 2]))
+        print('File %s was saved.'%(filename))
 
     def process_contour(self):
         fim = False
         self.checkpoint = 0
 
         i = 0
+        j = 0
         while i < self.height and not fim:
             j = 0
             while j < self.width and not fim:
@@ -156,11 +158,16 @@ def load_image(filename, scale):
     return np.transpose(img, axes=[1, 0, 2])
 
 
-def segment(filename, threshold, scale=None):
+def segment(filename, threshold, binary_file, segmented_file, scale=None):
     seg = Segmentator(filename, threshold, scale)
     seg.process_contour()
-    cv2.imwrite('/tmp/a.png', np.transpose(seg.img_bin, axes=[1, 0]))
-    seg.save_segmentation()
+    if binary_file is None:
+        binary_file = '/tmp/binary.png'
+    cv2.imwrite(binary_file, np.transpose(seg.img_bin, axes=[1, 0]))
+    print('File %s was saved.'%(binary_file))
+    if segmented_file is None:
+        segmented_file = '/tmp/segmented.png'
+    seg.save_segmentation(segmented_file)
 
 
 if __name__ == '__main__':
@@ -168,6 +175,12 @@ if __name__ == '__main__':
     parser.add_argument('-input-file', type=str)
     parser.add_argument('-threshold', type=int)
     parser.add_argument('-scale', type=float)
+    parser.add_argument('-output-binary', type=str)
+    parser.add_argument('-output-segmented', type=str)
     args = parser.parse_args()
     if args.input_file is not None and args.threshold is not None:
-        segment(args.input_file, args.threshold, args.scale)
+        segment(args.input_file,
+                args.threshold,
+                args.output_binary,
+                args.output_segmented,
+                args.scale)

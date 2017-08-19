@@ -1,10 +1,12 @@
 import math
 import numpy as np
+import os
 import pandas as pd
 from coccimorph.segment import load_image
 
 
 RED = (0, 0, 255)
+
 
 class FeatureExtractor:
     def __init__(self, filename, scale):
@@ -356,7 +358,7 @@ class FeatureExtractor:
 
 
 class ClassificaGauss(object):
-    def __init__(self, basedir='/opt/coccimorph/prototypes/'):
+    def __init__(self, basedir=os.path.dirname(__file__) + '/../prototypes'):
         self.kl = []
         for i in range(1, 8):
             filename = 'kl9596_%d.txt'%(i)
