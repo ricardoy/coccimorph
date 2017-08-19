@@ -56,4 +56,4 @@ Entropy of co-occurence matrix: 3.766e+01
 E. acervulina: 71.5685
 E. necatrix: 28.1404
 E. mitis: 7.0517
-```ocyst/coccimorph/tutorials/ElevenSpeciesRabbit.zip).
+```
