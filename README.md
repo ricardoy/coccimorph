@@ -8,7 +8,7 @@ This is a pure Python 3 implementation of [COCCIMORPH](http://www.coccidia.icb.u
 $ conda create --name coccimorph biopython
 $ source activate coccimorph
 $ python -m ipykernel install --name coccimorph --user
-$ pip install pandas opencv-python
+$ pip install pandas opencv-python numpy
 ```
 
 Before running the scripts:
