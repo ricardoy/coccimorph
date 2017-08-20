@@ -7,6 +7,31 @@ from coccimorph.segment import load_image
 
 RED = (0, 0, 255)
 
+fowl_species = [
+    'E. acervulina',
+    'E. maxima',
+    'E. brunetti',
+    'E. mitis',
+    'E. praecox',
+    'E. tenella',
+    'E. necatrix'
+]
+
+rabbit_species = [
+    'E. coecicola',
+    'E. exigua',
+    'E. flavescens',
+    'E. intestinalis',
+    'E. irresidua',
+    'E. magna',
+    'E. media',
+    'E. perforans',
+    'E. piriformis',
+    'E. stiedai',
+    'E. vejdovskyi'
+]
+
+basedir = os.path.dirname(__file__) + '/../prototypes'
 
 class FeatureExtractor:
     def __init__(self, filename, scale):
@@ -368,6 +393,10 @@ class FeatureExtractor:
             self.wEnt[self.ima[i, j]] = 1 + self.wEnt[self.ima[i, j]]
 
 
+def generate_similarity_classifier_fowl():
+    return ClassificaGauss()
+
+
 class ClassificaGauss(object):
     def __init__(self, basedir=os.path.dirname(__file__) + '/../prototypes'):
         self.kl = []
@@ -394,18 +423,20 @@ class ClassificaGauss(object):
         print('\nSimilarity classification:')
         class_density_value = []
         for i, kl_w in enumerate(self.kl):
-            class_density_value.append(self.find_class_density(x, kl_w, i+1))
+            class_density_value.append(self._find_class_density(x, kl_w, i + 1))
 
         taxa_acerto = np.zeros(7, dtype=np.float)
         for i in range(7):
             if class_density_value[i] > 0.0:
-               taxa_acerto[i] = class_density_value[i]*100./self.acerto_medio[i]
+               taxa_acerto[i] = class_density_value[i] * 100. / self.acerto_medio[i]
 
         for i in reversed(np.argsort(taxa_acerto)):
             if taxa_acerto[i] > 0.0:
-                print('%s: %.4f'%(self.species[i],taxa_acerto[i]))
+                print('%s: %.4f' % (self.species[i], taxa_acerto[i]))
 
-    def find_class_density(self, x, kl_w, w_especie):
+        return taxa_acerto
+
+    def _find_class_density(self, x, kl_w, w_especie):
         gx = .0
 
         if not math.isclose(np.linalg.det(kl_w), 0): # det(kl_w) != 0.0
@@ -437,31 +468,42 @@ class ClassificaGauss(object):
         return gx
 
 
+def generate_probability_classifier_rabbit():
+    fq = []
+    for i in range(1, 14):
+        filename = 'freqRabbit_%d.txt' % (i)
+        fq.append(np.array(read_csv(basedir, filename), dtype=np.float64))
+    per_w = read_csv(basedir, 'PerRabbit.txt')
+    vpriori = np.repeat(0.090909091, 11)
+    taxa_acerto = np.zeros(11, dtype=np.float)
+    return ClassificaProb(fq, per_w, vpriori, taxa_acerto, rabbit_species)
+
+
+def generate_probability_classifier_fowl():
+    fq = []
+    for i in range(1, 14):
+        filename = 'freqFowl_%d.txt' % (i)
+        fq.append(np.array(read_csv(basedir, filename), dtype=np.float64))
+    per_w = read_csv(basedir, 'PerFowl.txt')
+    vpriori = np.repeat(0.14285, 7)
+    taxa_acerto = np.zeros(7, dtype=np.float)
+    return ClassificaProb(fq, per_w, vpriori, taxa_acerto, fowl_species)
+
+
 class ClassificaProb:
-    def __init__(self, basedir=os.path.dirname(__file__) + '/../prototypes'):
-        self.nclass = 7
-        self.fq = []
-        for i in range(1, 14):
-            filename = 'freqFowl_%d.txt'%(i)
-            self.fq.append(np.array(read_csv(basedir, filename), dtype=np.float64))
-        self.per_w = read_csv(basedir, 'PerFowl.txt')
-        self.vpriori = np.repeat(0.14285, 7)
-        self.taxa_acerto = np.zeros(7, dtype=np.float)
-        self.species = [
-            'E. acervulina',
-            'E. maxima',
-            'E. brunetti',
-            'E. mitis',
-            'E. praecox',
-            'E. tenella',
-            'E. necatrix'
-        ]
+    def __init__(self, fq, per_w, vpriori, taxa_acerto, species):
+        self.fq = fq
+        self.per_w = per_w
+        self.vpriori = vpriori
+        self.taxa_acerto = taxa_acerto
+        self.species = species
+        self.nclass = len(species)
 
     def classify(self, x):
         print('Probability classification:')
-        self.find_posteriori(x, self.fq[0], self.fq[0], 0)
+        self._find_posteriori(x, self.fq[0], self.fq[0], 0)
         for i in range(1, 13):
-            self.find_posteriori(x, self.fq[i - 1], self.fq[i], i)
+            self._find_posteriori(x, self.fq[i - 1], self.fq[i], i)
 
         """
         The last frequency matrix stores the final classification results; 
@@ -483,13 +525,13 @@ class ClassificaProb:
             in last percentil
             """
             for i in range(self.nclass):
-                self.taxa_acerto[i] = fq[-1][i, -1] * 100
+                self.taxa_acerto[i] = self.fq[-1][i, -1] * 100
 
         for i in reversed(np.argsort(self.taxa_acerto)):
             if self.taxa_acerto[i] > 1e-4:
                 print('%s: %.4f' % (self.species[i], self.taxa_acerto[i]))
 
-    def find_posteriori(self, x, fq0, fq2, w_feature):
+    def _find_posteriori(self, x, fq0, fq2, w_feature):
         """
         Computes the posterior probability of the frequency matrix; this approach
         is based on the Dirichlet density (frequency and percentiles matrices).
@@ -569,4 +611,4 @@ class ClassificaProb:
 
 
 def read_csv(basedir, filename):
-    return pd.read_csv('%s/%s'%(basedir, filename), sep='\s+', header=None).as_matrix()
+    return np.array(pd.read_csv('%s/%s'%(basedir, filename), sep='\s+', header=None).as_matrix(), dtype=np.float64)

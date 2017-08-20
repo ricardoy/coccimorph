@@ -1,6 +1,9 @@
 from coccimorph.segment import Segmentator
 from coccimorph.functions import fftderiv, entropy
-from coccimorph.content import FeatureExtractor, ClassificaGauss, ClassificaProb
+from coccimorph.content import FeatureExtractor
+from coccimorph.content import ClassificaGauss
+from coccimorph.content import generate_probability_classifier_fowl
+from coccimorph.content import generate_probability_classifier_rabbit
 import argparse
 import numpy as np
 
@@ -27,7 +30,7 @@ def output_xvector(xvector):
     print()
 
 
-def predict(filename, threshold, scale):
+def predict(filename, threshold, scale, fowl, rabbit):
     seg = Segmentator(filename, threshold, scale)
     seg.process_contour()
 
@@ -69,11 +72,17 @@ def predict(filename, threshold, scale):
 
     output_xvector(xvector)
 
-    prob_classifier = ClassificaProb()
-    prob_classifier.classify(xvector)
+    if fowl:
+        prob_classifier = generate_probability_classifier_fowl()
+        prob_classifier.classify(xvector)
+        classifier = ClassificaGauss()
+        classifier.classify(xvector)
+    if rabbit:
+        prob_classifier = generate_probability_classifier_rabbit()
+        prob_classifier.classify(xvector)
+        classifier = ClassificaGauss()
+        classifier.classify(xvector)
 
-    classifier = ClassificaGauss()
-    classifier.classify(xvector)
 
 
 if __name__ == '__main__':
@@ -81,6 +90,11 @@ if __name__ == '__main__':
     parser.add_argument('-input-file', type=str)
     parser.add_argument('-threshold', type=int)
     parser.add_argument('-scale', type=float)
+    parser.add_argument('--fowl', action='store_true')
+    parser.add_argument('--rabbit', action='store_true')
     args = parser.parse_args()
+    if not args.fowl and not args.rabbit:
+        parser.print_help()
+        exit(-1)
     if args.input_file is not None and args.threshold is not None:
-        predict(args.input_file, args.threshold, args.scale)
+        predict(args.input_file, args.threshold, args.scale, args.fowl, args.rabbit)

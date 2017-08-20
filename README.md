@@ -33,7 +33,7 @@ $ python coccimorph/segment.py -i <IMAGE> -t <integer between 0 and 255> [-s <im
 After choosing the threshold value, run the `classifier.py` script:
 
 ```bash
-$ python coccimorph/classifier.py  -input-file <IMAGE> -t <THRESHOLD> [-s <SCALE>]
+$ python coccimorph/classifier.py  -input-file <IMAGE> -t <THRESHOLD> [--fowl | --rabit] [-s <SCALE>]
 ```
 
 If no problems occurred, an output similar to the following one should be shown:
