@@ -98,8 +98,7 @@ class FeatureExtractor:
         # transform to new space using inverse matrix of eigen vectors
         vx1 = np.zeros(n, dtype=np.float)
         vy1 = np.zeros(n, dtype=np.float)
-        vx2 = np.zeros(n, dtype=np.float)
-        vy2 = np.zeros(n, dtype=np.float)
+
         sumvx1 = 0
         sumvy1 = 0
         for i in range(n):
@@ -156,29 +155,39 @@ class FeatureExtractor:
             vy2[i] = vy_w
 
         # compute the simmetry
-        highX1 = np.max(self._round(vx1))+3
-        highY1 = np.max(self._round(vy1))+3
-        highX2 = np.max(self._round(vx2))+3
-        highY2 = np.max(self._round(vy2))+3
+        """        
+        TODO: original program was +3... this and the 500 columns look like
+        hard constraints over the image size 
+        """
+        highX1 = np.max(self._round(vx1))+4
+        highY1 = np.max(self._round(vy1))+4
+        highX2 = np.max(self._round(vx2))+4
+        highY2 = np.max(self._round(vy2))+4
 
         # create temporal matrices to compute erosion, dilation and rate simmetry
         ima3a = np.zeros((highX1, highY1))
         ima3b = np.zeros((highX2, highY2))
+
+        try:
+            assert (np.max(self.vx) < highX1)
+        except AssertionError:
+            print('Constraint for max(vx) < highX1 does not hold!')
+            print(np.max(self.vx), highX1)
+
+        try:
+            assert (np.max(self.vx) < highX2)
+        except AssertionError as e:
+            print('Constraint for max(vx) < highX2 does not hold!')
+            print(np.max(self.vx), highX2)
 
         ima2a = np.zeros((highX1, 500), dtype=np.int)
         ima2b = np.zeros((highX2, 500), dtype=np.int)
         ima4a = np.zeros((highX1, 500), dtype=np.int)
         ima4b = np.zeros((highX2, 500), dtype=np.int)
 
-        # print('ima2b.shape', ima2b.shape)
-        # print('n', n)
-        # print('max vx', np.max(self.vx))
-        # print('max vy', np.max(self.vy))
         for i in range(n):
             ima2a[int(self.vx[i]), int(self.vy[i])] = 1
             ima2b[int(self.vx[i]), int(self.vy[i])] = 1
-            # print(ima3a.shape)
-            # print(int(np.round(vy1[i])))
             ima3a[int(np.round(vx1[i])), int(np.round(vy1[i]))] = 1
             ima3b[int(np.round(vx2[i])), int(np.round(vy2[i]))] = 1
 
