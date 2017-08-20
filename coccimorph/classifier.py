@@ -1,6 +1,6 @@
 from coccimorph.segment import Segmentator
 from coccimorph.functions import fftderiv, entropy
-from coccimorph.content import FeatureExtractor, ClassificaGauss
+from coccimorph.content import FeatureExtractor, ClassificaGauss, ClassificaProb
 import argparse
 import numpy as np
 
@@ -26,7 +26,7 @@ def output_xvector(xvector):
     print()
 
 
-def predict(filename, threshold, scale=None):
+def predict(filename, threshold, scale):
     seg = Segmentator(filename, threshold, scale)
     seg.process_contour()
 
@@ -70,6 +70,9 @@ def predict(filename, threshold, scale=None):
     xvector.append(feature_extractor.mcc_ent())
 
     output_xvector(xvector)
+
+    prob_classifier = ClassificaProb()
+    prob_classifier.classify(xvector)
 
     classifier = ClassificaGauss()
     classifier.classify(xvector)

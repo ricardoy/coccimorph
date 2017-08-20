@@ -30,10 +30,10 @@ $ python coccimorph/segment.py -i <IMAGE> -t <integer between 0 and 255> [-s <im
 
 ([This document](http://www.coccidia.icb.usp.br/uploadoocyst/coccimorph/tutorials/Tutorial-1-On-Line-Diagnosis.pdf) provides information about how to choose the threshold and the image scale)
 
-After choosing the threshold value, run the `similarity_classifier.py` script:
+After choosing the threshold value, run the `classifier.py` script:
 
 ```bash
-$ python coccimorph/similarity_classifier.py  -input-file <IMAGE> -t <THRESHOLD> [-s <SCALE>]
+$ python coccimorph/classifier.py  -input-file <IMAGE> -t <THRESHOLD> [-s <SCALE>]
 ```
 
 If no problems occurred, an output similar to the following one should be shown:
@@ -53,7 +53,13 @@ Contrast from co-occurrence matrix: 3.905e+02
 Inverse difference moment from co-occurrence matrix: 1.124e-01
 Entropy of co-occurence matrix: 3.766e+01
 
+Probability classification:
+E. acervulina: 99.5308
+E. mitis: 0.4692
+
+Similarity classification:
 E. acervulina: 71.5685
 E. necatrix: 28.1404
 E. mitis: 7.0517
+
 ```

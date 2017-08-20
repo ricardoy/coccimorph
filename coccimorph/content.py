@@ -380,6 +380,7 @@ class ClassificaGauss(object):
         ]
 
     def classify(self, x):
+        print('\nSimilarity classification:')
         class_density_value = []
         for i, kl_w in enumerate(self.kl):
             class_density_value.append(self.find_class_density(x, kl_w, i+1))
@@ -423,6 +424,137 @@ class ClassificaGauss(object):
 
         # print('gx: ', gx)
         return gx
+
+
+class ClassificaProb:
+    def __init__(self, basedir=os.path.dirname(__file__) + '/../prototypes'):
+        self.nclass = 7
+        self.fq = []
+        for i in range(1, 14):
+            filename = 'freqFowl_%d.txt'%(i)
+            self.fq.append(np.array(read_csv(basedir, filename), dtype=np.float64))
+        self.per_w = read_csv(basedir, 'PerFowl.txt')
+        self.vpriori = np.repeat(0.14285, 7)
+        self.taxa_acerto = np.zeros(7, dtype=np.float)
+        self.species = [
+            'E. acervulina',
+            'E. maxima',
+            'E. brunetti',
+            'E. mitis',
+            'E. praecox',
+            'E. tenella',
+            'E. necatrix'
+        ]
+
+    def classify(self, x):
+        print('Probability classification:')
+        self.find_posteriori(x, self.fq[0], self.fq[0], 0)
+        for i in range(1, 13):
+            self.find_posteriori(x, self.fq[i-1], self.fq[i], i)
+
+        """
+        The last frequency matrix stores the final classification results; 
+        detection is done locating the percetil where the last feature is.
+        Then, the column of the percentil elected is the posterior probability
+        classification.
+        """
+        wflag = False
+        for wcont in range(self.nclass):
+            wper = self.per_w[12, wcont]
+            if not wflag and x[12] <= wper:
+                for i in range(self.nclass):
+                    self.taxa_acerto[i] = self.fq[-1][i, wcont] * 100
+                wflag = True
+
+        if not wflag:
+            """
+            If the element is greater than higher value, it is considered
+            in last percentil
+            """
+            for i in range(self.nclass):
+                self.taxa_acerto[i] = fq[-1][i, -1] * 100
+
+        for i in reversed(np.argsort(self.taxa_acerto)):
+            if self.taxa_acerto[i] > 1e-4:
+                print('%s: %.4f' % (self.species[i], self.taxa_acerto[i]))
+
+    def find_posteriori(self, x, fq0, fq2, w_feature):
+        """
+        Computes the posterior probability of the frequency matrix; this approach
+        is based on the Dirichlet density (frequency and percentiles matrices).
+        :param x: features vector
+        :param fq0: previous frequency matrix
+        :param fq2: current frequency matrix
+        :param w_feature:
+        """
+        wsum = 0.0
+        aa = 0.0
+        wper = 0.0
+
+
+        # TODO: acho que é possível simplificar os for's
+        for i in range(self.nclass):
+            wsum = 0.0
+            for j in range(self.nclass):
+                aa = fq2[i, j]
+                aa = aa * (2.0 / self.nclass)
+                fq2[i, j] = aa
+                wsum += aa
+            for j in range(self.nclass):
+                aa = fq2[i, j]
+                if wsum > 0.0:
+                    aa = aa / wsum
+                fq2[i, j] = aa
+
+        if w_feature == 0:
+            for i in range(self.nclass):
+                wsum = 0.0
+                for j in range(self.nclass):
+                    aa = fq2[j, i]
+                    aa = aa * self.vpriori[j]
+                    fq2[j, i] = aa
+                    wsum += aa
+                for j in range(self.nclass):
+                    aa = fq2[j, i]
+                    if wsum > 0.0:
+                        aa = aa / wsum
+                    fq2[j, i] = aa
+        else:
+            wflag = 0
+            for wcont in range(self.nclass):
+                """
+                if the number of features is greater than 0,
+                the correct percentil was found in the previous matrix
+                and the column-percentil will be the priori probability
+                """
+                wper = self.per_w[w_feature-1, wcont]
+                if wflag == 0 and x[w_feature-1] <= wper:
+                    for i in range(self.nclass):
+                        self.vpriori[i] = fq0[i, wcont]
+                    wflag = 1
+            if wflag == 0:
+                """
+                if the element is greater than the highest value, it is 
+                connsidered in last percentil
+                """
+                for i in range(self.nclass):
+                    self.vpriori[i] = fq0[i, self.nclass-1]
+            for i in range(self.nclass):
+                wsum = 0.0
+                for j in range(self.nclass):
+                    """
+                    frequency matrix is multiplied by the new priori 
+                    probability vector, computed from the previous matrix
+                    """
+                    aa = fq2[j, i]
+                    aa = aa * self.vpriori[j]
+                    fq2[j, i] = aa
+                    wsum += aa
+                for j in range(self.nclass):
+                    aa = fq2[j, i]
+                    if wsum > 0.0:
+                        aa = aa / wsum
+                    fq2[j, i] = aa
 
 
 def read_csv(basedir, filename):
