@@ -31,38 +31,39 @@ class Segmentator(object):
 
     def process_contour(self):
         fim = False
+        starting_point_found = False
         self.checkpoint = 0
 
         i = 0
-        j = 0
         while i < self.height and not fim:
             j = 0
             while j < self.width and not fim:
                 if self.img_bin[i][j] == 255:
                     self.vx.append(i)
                     self.vy.append(j-1)
+                    starting_point_found = True
                     fim = True
                 j += 1
             i += 1
 
-        if i >= self.height or j >= self.width:
+        if not starting_point_found:
             self.vx.append(0)
             self.vy.append(0)
 
         if self.vx[0] > 1 and self.vy[0] > 1 and \
-            self.vx[0] < self.height-1 and self.vy[0] < self.width-1:
+                self.vx[0] < self.height - 1 and self.vy[0] < self.width - 1:
             n = 2
 
             x4 = self.vx[0]
-            y4 = self.vy[0]-1
-            x5 = self.vx[0]+1
-            y5 = self.vy[0]-1
-            x6 = self.vx[0]+1
+            y4 = self.vy[0] - 1
+            x5 = self.vx[0] + 1
+            y5 = self.vy[0] - 1
+            x6 = self.vx[0] + 1
             y6 = self.vy[0]
-            x7 = self.vx[0]+1
-            y7 = self.vy[0]+1
+            x7 = self.vx[0] + 1
+            y7 = self.vy[0] + 1
             x0 = self.vx[0]
-            y0 = self.vy[0]+1
+            y0 = self.vy[0] + 1
             dcn = 0
 
             next_pixel = (0, 0)
@@ -106,8 +107,8 @@ class Segmentator(object):
         for r in range(7):
             dE = (dcp + r) % 8
             dI = (dcp + r + 1) % 8
-            pe = self.chainpoint(pcx, pcy, dE)
-            pi = self.chainpoint(pcx, pcy, dI)
+            pe = self.chain_point(pcx, pcy, dE)
+            pi = self.chain_point(pcx, pcy, dI)
             if self.is_background(pe) and self.is_object(pi):
                 w2[0] = pe[0]
                 w2[1] = pe[1]
@@ -120,23 +121,23 @@ class Segmentator(object):
     def is_object(self, pi):
         return self.img_bin[pi[0], pi[1]] == 255
 
-    def chainpoint(self, pcx, pcy, d):
+    def chain_point(self, pcx, pcy, d):
         if d == 0:
-            return pcx, pcy+1
+            return pcx, pcy + 1
         elif d == 1:
-            return pcx-1, pcy+1
+            return pcx - 1, pcy + 1
         elif d == 2:
-            return pcx-1, pcy
+            return pcx - 1, pcy
         elif d == 3:
-            return pcx-1, pcy-1
+            return pcx - 1, pcy - 1
         elif d == 4:
-            return pcx, pcy-1
+            return pcx, pcy - 1
         elif d == 5:
-            return pcx+1, pcy-1
+            return pcx + 1, pcy - 1
         elif d == 6:
-            return pcx+1, pcy
+            return pcx + 1, pcy
         elif d == 7:
-            return pcx+1, pcy+1
+            return pcx + 1, pcy + 1
         else:
             raise ValueError('Parameter d should be an integer in [0, 7].')
 

@@ -6,7 +6,8 @@ import numpy as np
 
 
 def printf(label, num):
-    print('%s %.3e'%(label, num))
+    print('%s %.3e' % (label, num))
+
 
 def output_xvector(xvector):
     print()
@@ -33,9 +34,6 @@ def predict(filename, threshold, scale):
     f1 = seg.vx
     f2 = seg.vy
 
-    # print(f1)
-    # print(f2)
-
     n = len(f1)
     sigma = 10
 
@@ -45,7 +43,7 @@ def predict(filename, threshold, scale):
     d1y = fftderiv(f2, 1, sigma, n)
     d2y = fftderiv(f2, 2, sigma, n)
 
-    # cunvature K and its moments
+    # curvature K and its moments
     k = (d1x * d2y - d1y * d2x) / np.power(np.power(d1x, 2) + np.power(d1y, 2), 1.5)
 
     xvector = []
@@ -62,10 +60,10 @@ def predict(filename, threshold, scale):
     xvector.append(feature_extractor.less_diameter)
     xvector.append(feature_extractor.sym_high_pc)
     xvector.append(feature_extractor.sym_less_pc)
-    xvector.append(feature_extractor.obj_size) # problema
+    xvector.append(feature_extractor.obj_size)
     xvector.append(feature_extractor.obj_entropy)
     xvector.append(feature_extractor.mcc_asm())
-    xvector.append(feature_extractor.mcc_con()) # problema
+    xvector.append(feature_extractor.mcc_con())
     xvector.append(feature_extractor.mcc_idf())
     xvector.append(feature_extractor.mcc_ent())
 
@@ -76,6 +74,7 @@ def predict(filename, threshold, scale):
 
     classifier = ClassificaGauss()
     classifier.classify(xvector)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Similarity classifier.')

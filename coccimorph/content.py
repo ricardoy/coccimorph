@@ -21,21 +21,22 @@ class FeatureExtractor:
         self.obj_entropy = 0.0
         self.obj_size = 0.0
 
+        self.mcc = None
+
     def set_co_matrix(self, d: int):
         aux_mcc = np.zeros((256, 256), dtype=np.int)
         ro = 0
         for x in range(self.height):
             for y in range(self.width-d):
-                if self.ima[x,y] > 0 and self.ima[x,y+d] > 0:
-                    aux_mcc[self.ima[x,y],self.ima[x,y+d]] += 1
+                if self.ima[x, y] > 0 and self.ima[x, y + d] > 0:
+                    aux_mcc[self.ima[x, y], self.ima[x, y + d]] += 1
                     ro += 1
 
-        y = 0
         for x in range(self.height):
             y = self.width-1
-            while y > d-1:
-                if self.ima[x,y]>0 and self.ima[x,y-d]>0:
-                    aux_mcc[self.ima[x,y], self.ima[x,y-d]] += 1
+            while y > d - 1:
+                if self.ima[x, y] > 0 and self.ima[x, y - d] > 0:
+                    aux_mcc[self.ima[x, y], self.ima[x, y - d]] += 1
                     ro += 1
                 y -= 1
 
@@ -48,22 +49,22 @@ class FeatureExtractor:
         sm = 0.0
         for i in range(256):
             for j in range(256):
-                sm += self.mcc[i,j]*(i-j)*(i-j)
+                sm += self.mcc[i, j]*(i-j)*(i-j)
         return sm
 
     def mcc_idf(self):
         sm = 0.0
         for i in range(256):
             for j in range(256):
-                sm += self.mcc[i,j] / float(1 + (i-j)*(i-j))
+                sm += self.mcc[i, j] / float(1 + (i-j)*(i-j))
         return sm
 
     def mcc_ent(self):
         sm = 0.0
         for i in range(256):
             for j in range(256):
-                if self.mcc[i,j]>0:
-                    sm += self.mcc[i,j]*np.log(self.mcc[i,j])
+                if self.mcc[i, j] > 0:
+                    sm += self.mcc[i, j]*np.log(self.mcc[i, j])
         return sm * sm / 2.
 
     def eigens(self):
@@ -102,8 +103,8 @@ class FeatureExtractor:
         sumvx1 = 0
         sumvy1 = 0
         for i in range(n):
-            vx_w = evec_inv[0,0]*self.vx[i] + evec_inv[0,1]*self.vy[i]
-            vy_w = evec_inv[1,0]*self.vx[i] + evec_inv[1,1]*self.vy[i]
+            vx_w = evec_inv[0, 0] * self.vx[i] + evec_inv[0, 1] * self.vy[i]
+            vy_w = evec_inv[1, 0] * self.vx[i] + evec_inv[1, 1] * self.vy[i]
             sumvx1 += vx_w
             sumvy1 += vy_w
             vx1[i] = vx_w
@@ -188,6 +189,7 @@ class FeatureExtractor:
         for i in range(n):
             ima2a[int(self.vx[i]), int(self.vy[i])] = 1
             ima2b[int(self.vx[i]), int(self.vy[i])] = 1
+
             ima3a[int(np.round(vx1[i])), int(np.round(vy1[i]))] = 1
             ima3b[int(np.round(vx2[i])), int(np.round(vy2[i]))] = 1
 
@@ -459,7 +461,7 @@ class ClassificaProb:
         print('Probability classification:')
         self.find_posteriori(x, self.fq[0], self.fq[0], 0)
         for i in range(1, 13):
-            self.find_posteriori(x, self.fq[i-1], self.fq[i], i)
+            self.find_posteriori(x, self.fq[i - 1], self.fq[i], i)
 
         """
         The last frequency matrix stores the final classification results; 
@@ -529,7 +531,7 @@ class ClassificaProb:
                         aa = aa / wsum
                     fq2[j, i] = aa
         else:
-            wflag = 0
+            wflag = False
             for wcont in range(self.nclass):
                 """
                 if the number of features is greater than 0,
@@ -537,11 +539,11 @@ class ClassificaProb:
                 and the column-percentil will be the priori probability
                 """
                 wper = self.per_w[w_feature-1, wcont]
-                if wflag == 0 and x[w_feature-1] <= wper:
+                if not wflag and x[w_feature-1] <= wper:
                     for i in range(self.nclass):
                         self.vpriori[i] = fq0[i, wcont]
-                    wflag = 1
-            if wflag == 0:
+                    wflag = True
+            if not wflag:
                 """
                 if the element is greater than the highest value, it is 
                 connsidered in last percentil

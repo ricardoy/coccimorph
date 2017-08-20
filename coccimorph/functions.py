@@ -1,7 +1,8 @@
 import numpy as np
 
-# implementando os métodos do funtions.h
-def fftderiv(in_elem, ord: int, sigma: int, n: int):
+
+# Implementing methods from functions.h
+def fftderiv(in_elem, order: int, sigma: int, n: int):
     df = 1 / float(n)
     aux = n * df
     n_p = int(n / 2 + 1)
@@ -14,23 +15,23 @@ def fftderiv(in_elem, ord: int, sigma: int, n: int):
         f[i] = f[i] - aux
 
     g_lambda = np.vectorize(lambda x: np.complex(np.exp(-2*np.power(sigma*np.pi*x, 2)), 0))
-    G = g_lambda(f)
+    g = g_lambda(f)
 
-    U = None
-    if ord == 1:
+    if order == 1:
         u_lambda = np.vectorize(lambda x: np.complex(0, 2.*np.pi*x))
-        U = u_lambda(f)
+        u = u_lambda(f)
     else:
         u_lambda = np.vectorize(lambda x: np.complex(-1*np.power(2.*np.pi*x, 2), 0))
-        U = u_lambda(f)
+        u = u_lambda(f)
 
-    F = np.fft.rfft(in_elem)
-    F = F * G * U
-    return np.fft.irfft(F)
+    f = np.fft.rfft(in_elem)
+    f = f * g * u
+    return np.fft.irfft(f)
+
 
 def entropy(k):
-    sum = 0.0
+    s = 0.0
     for k_ in k:
         if k_ > 0.0:
-            sum += k_ * np.log(k_)
-    return (sum * sum) / 2.0
+            s += k_ * np.log(k_)
+    return (s * s) / 2.0
