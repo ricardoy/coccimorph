@@ -1,8 +1,9 @@
 from coccimorph.segment import Segmentator
 from coccimorph.functions import fftderiv, entropy
 from coccimorph.content import FeatureExtractor
-from coccimorph.content import ClassificaGauss
+from coccimorph.content import generate_similarity_classifier_fowl
 from coccimorph.content import generate_probability_classifier_fowl
+from coccimorph.content import generate_similarity_classifier_rabbit
 from coccimorph.content import generate_probability_classifier_rabbit
 import argparse
 import numpy as np
@@ -75,13 +76,13 @@ def predict(filename, threshold, scale, fowl, rabbit):
     if fowl:
         prob_classifier = generate_probability_classifier_fowl()
         prob_classifier.classify(xvector)
-        classifier = ClassificaGauss()
-        classifier.classify(xvector)
+        simi_classifier = generate_similarity_classifier_fowl()
+        simi_classifier.classify(xvector)
     if rabbit:
         prob_classifier = generate_probability_classifier_rabbit()
         prob_classifier.classify(xvector)
-        classifier = ClassificaGauss()
-        classifier.classify(xvector)
+        simi_classifier = generate_similarity_classifier_rabbit()
+        simi_classifier.classify(xvector)
 
 
 

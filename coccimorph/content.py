@@ -394,36 +394,58 @@ class FeatureExtractor:
 
 
 def generate_similarity_classifier_fowl():
-    return ClassificaGauss()
+    kl = []
+    for i in range(1, 8):
+        filename = 'kl9596_%d.txt' % (i)
+        kl.append(read_csv(basedir, filename))
+    ml_w = read_csv(basedir, 'ml9596.txt')
+    acerto_medio = [25.637479,
+                    26.916101,
+                    25.665415,
+                    27.480373,
+                    25.245048,
+                    25.213264,
+                    25.585858]
+    pw = np.repeat(0.14285, 7)
+    return ClassificaGauss(kl, ml_w, acerto_medio, pw, fowl_species)
+
+def generate_similarity_classifier_rabbit():
+    kl = []
+    for i in range(1, 12):
+        filename = 'klrabbit_%d.txt' % (i)
+        kl.append(read_csv(basedir, filename))
+    ml_w = read_csv(basedir, 'mlrabbit.txt')
+    acerto_medio = [19.302075,
+                    27.880435,
+                    22.425938,
+                    21.380911,
+                    23.390403,
+                    22.006214,
+                    17.269468,
+                    20.519256,
+                    22.786217,
+                    19.94028,
+                    21.71183]
+    pw = np.repeat(0.090909091, 11)
+    return ClassificaGauss(kl, ml_w, acerto_medio, pw, rabbit_species)
 
 
 class ClassificaGauss(object):
-    def __init__(self, basedir=os.path.dirname(__file__) + '/../prototypes'):
-        self.kl = []
-        for i in range(1, 8):
-            filename = 'kl9596_%d.txt'%(i)
-            self.kl.append(read_csv(basedir, filename))
-        self.ml_w = read_csv(basedir, 'ml9596.txt')
-
-        # print('ml shape:', self.ml_w.shape)
-
-        self.acerto_medio = [25.637479, 26.916101, 25.665415, 27.480373, 25.245048, 25.213264, 25.585858]
-        self.pw = [0.14285, 0.14285, 0.14285, 0.14285, 0.14285, 0.14285, 0.14285]
-        self.species = [
-            'E. acervulina',
-            'E. maxima',
-            'E. brunetti',
-            'E. mitis',
-            'E. praecox',
-            'E. tenella',
-            'E. necatrix'
-        ]
+    def __init__(self, kl, ml_w, acerto_medio, pw, species):
+        self.kl = kl
+        self.ml_w = ml_w
+        self.acerto_medio = acerto_medio
+        self.pw = pw
+        self.species = species
 
     def classify(self, x):
         print('\nSimilarity classification:')
         class_density_value = []
         for i, kl_w in enumerate(self.kl):
             class_density_value.append(self._find_class_density(x, kl_w, i + 1))
+
+        # for x in class_density_value:
+        #     print('density:', x)
 
         taxa_acerto = np.zeros(7, dtype=np.float)
         for i in range(7):
@@ -444,6 +466,9 @@ class ClassificaGauss(object):
             mxt = np.zeros((13, 1), dtype=np.float)
             for i in range(13):
                 mx[0, i] = x[i] - self.ml_w[w_especie-1, i]
+                # print('x_i:', x[i])
+                # print('subtraendo:', self.ml_w[w_especie-1, i])
+                # print('mx:', mx[0, i])
                 mxt[i, 0] = x[i] - self.ml_w[w_especie-1, i]
             mx_inv = np.dot(mx, np.linalg.inv(kl_w))
             mx_inv_mx = np.dot(mx_inv, mxt)
@@ -456,8 +481,12 @@ class ClassificaGauss(object):
             # print('mx', mx)
 
             aa = mx_inv_mx[0, 0]
+            # print('aa:', aa)
             bb = np.linalg.det(kl_w)
+            # print('det:', bb)
             cc = np.log(bb)
+            # cc = round(cc, 4)
+            # print('log:', cc)
 
             # print ('aa:', aa, ' bb:', bb, ' cc:', cc)
             gx = (-0.5) * aa - (0.5 * cc)

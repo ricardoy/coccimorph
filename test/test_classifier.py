@@ -3,6 +3,7 @@ from coccimorph.content import fowl_species
 from coccimorph.content import generate_probability_classifier_rabbit
 from coccimorph.content import generate_probability_classifier_fowl
 from coccimorph.content import generate_similarity_classifier_fowl
+from coccimorph.content import generate_similarity_classifier_rabbit
 import unittest
 
 rabbit_map = dict()
@@ -15,7 +16,7 @@ for i, s in enumerate(fowl_species):
 
 
 class TestMethods(unittest.TestCase):
-    def test_rabbit_classifier(self):
+    def test_rabbit_probability_classifier(self):
         xvector = [
             6.700e-03,
             6.867e-03,
@@ -62,21 +63,42 @@ class TestMethods(unittest.TestCase):
         self.assertAlmostEqual(99.30, c.taxa_acerto[fowl_map['E. acervulina']], delta=.01)
         self.assertAlmostEqual(0.70, c.taxa_acerto[fowl_map['E. mitis']], delta=.01)
 
+    def test_rabbit_similarity_classifier(self):
+        xvector = [
+            0.0129782,
+            0.00211385,
+            324.234,
+            159.316,
+            151.269,
+            0.0144904,
+            0.0173005,
+            18827,
+            11.9328,
+            0.000324872,
+            463.133,
+            0.130554,
+            36.2551
+        ]
+
+        c = generate_similarity_classifier_rabbit()
+        taxa_acerto = c.classify(xvector)
+        self.assertAlmostEqual(67.35, taxa_acerto[rabbit_map['E. exigua']], delta=.01)
+
     def test_fowl_similarity_classifier(self):
         xvector = [
-            1.124e-02,
-            4.228e-03,
-            3.491e+02,
-            204,
-            147,
-            1.243e-02,
-            5.725e-02,
+            0.0112434,
+            0.00422792,
+            349.083,
+            204.885,
+            147.666,
+            0.0124258,
+            0.0572524,
             23879,
-            1.213e+01,
-            2.466e-04,
-            4.045e+02,
-            1.080e-01,
-            3.827e+01
+            12.1338,
+            0.000246645,
+            404.536,
+            0.107968,
+            38.2667
         ]
 
         c = generate_similarity_classifier_fowl()
