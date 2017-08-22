@@ -143,9 +143,10 @@ class Segmentator(object):
 
 
 def binaryze(img, threshold):
-    img_grayscale = np.average(img, axis=2)
+    img_grayscale = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     binarizer = np.vectorize(lambda x: 255 if x < threshold else 0)
     img_bin = binarizer(img_grayscale)
+    # print("primeiro pixel", img_grayscale[0, 0], "cores:", img[0, 0])
     return img_bin
 
 
@@ -164,7 +165,7 @@ def segment(filename, threshold, binary_file, segmented_file, scale=None):
     seg.process_contour()
     if binary_file is None:
         binary_file = '/tmp/binary.png'
-    cv2.imwrite(binary_file, np.transpose(seg.img_bin, axes=[1, 0]))
+    cv2.imwrite(binary_file, np.transpose(abs(seg.img_bin - 255), axes=[1, 0]))
     print('File %s was saved.'%(binary_file))
     if segmented_file is None:
         segmented_file = '/tmp/segmented.png'

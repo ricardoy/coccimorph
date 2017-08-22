@@ -3,6 +3,7 @@ import numpy as np
 import os
 import pandas as pd
 from coccimorph.segment import load_image
+import cv2
 
 
 RED = (0, 0, 255)
@@ -37,7 +38,8 @@ class FeatureExtractor:
     def __init__(self, filename, scale):
         self.img = load_image(filename, scale)
         self.height, self.width, _ = self.img.shape
-        self.img_gray = np.array(np.average(self.img, axis=2), dtype=np.int)
+        # self.img_gray = np.array(np.average(self.img, axis=2), dtype=np.int)
+        self.img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
         self.ima = np.zeros((self.height, self.width), dtype=np.int)
         self.vx = []
         self.vy = []
@@ -185,10 +187,10 @@ class FeatureExtractor:
         TODO: original program was +3... this and the 500 columns look like
         hard constraints over the image size 
         """
-        highX1 = np.max(self._round(vx1))+4
-        highY1 = np.max(self._round(vy1))+4
-        highX2 = np.max(self._round(vx2))+4
-        highY2 = np.max(self._round(vy2))+4
+        highX1 = np.max(self._round(vx1)) + 3
+        highY1 = np.max(self._round(vy1)) + 3
+        highX2 = np.max(self._round(vx2)) + 3
+        highY2 = np.max(self._round(vy2)) + 3
 
         # create temporal matrices to compute erosion, dilation and rate simmetry
         ima3a = np.zeros((highX1, highY1))
@@ -344,7 +346,7 @@ class FeatureExtractor:
         # print('cx:', cx)
         # print('cy:', cy)
 
-        self.ima[cx][cy] = int(np.average(self.img[cx, cy]))
+        self.ima[cx][cy] = int(self.img_gray[cx, cy])
         sm += self.ima[cx][cy] * np.log(self.ima[cx][cy])
 
         self.vx.append(cx)
