@@ -38,6 +38,11 @@ def predict(filename, threshold, scale, fowl, rabbit):
     f1 = seg.vx
     f2 = seg.vy
 
+    with open('/tmp/xxx.txt', 'w') as fh:
+        for a, b  in zip(f1, f2):
+            fh.write('%d,%d' % (a, b))
+            fh.write('\n')
+
     n = len(f1)
     sigma = 10
 

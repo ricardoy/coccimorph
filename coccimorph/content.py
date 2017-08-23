@@ -34,6 +34,65 @@ rabbit_species = [
 
 basedir = os.path.dirname(__file__) + '/../prototypes'
 
+
+def dilate(ima):
+    '''
+    Morphological dilation of binary matrix ima using
+    as default the structuring element(SE)
+    [0 1 0
+     1 1 1
+     0 1 0]
+    :param ima: a binary array
+    :return:
+    '''
+    dx, dy = ima.shape
+    se = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]
+    ima_temp = np.zeros((dx, 500), dtype=np.int)
+    for m in range(dx):
+        for n in range(dy):
+            ima_temp[m, n] = ima[m, n]
+
+    for m in range(1, dx - 1):
+        for n in range(1, dy - 1):
+            if ima_temp[m, n] == 1:
+                for i in range(3):
+                    for j in range(3):
+                        mw = m - 1
+                        nw = n - 1
+                        if ima[mw + i, nw + j] == 0:
+                            ima[mw + i, nw + j] = ima[mw + i, nw + j] or se[i][j]
+    return ima
+
+
+def erode(ima: np.ndarray):
+    dx, dy = ima.shape
+    ima_temp = np.zeros((dx, 500), dtype=np.int)
+
+    for m in range(dx):
+        for n in range(dy):
+            ima_temp[m, n] = ima[m, n]
+
+    for m in range(1, dx - 1):
+        for n in range(1, dy - 1):
+            if ima_temp[m, n] == 1:
+                aux = 1
+                aux *= ima_temp[m, n]
+                aux *= ima_temp[m - 1, n]
+                aux *= ima_temp[m + 1, n]
+                aux *= ima_temp[m, n - 1]
+                aux *= ima_temp[m, n + 1]
+                ima[m, n] = aux
+
+    for i in range(dx):
+        ima[i, 0] = 0
+        ima[i, dy - 1] = 0
+
+    for i in range(dy):
+        ima[0, i] = 0
+        ima[dx - 1, i] = 0
+
+    return ima
+
 class FeatureExtractor:
     def __init__(self, filename, scale):
         self.img = load_image(filename, scale)
@@ -220,14 +279,14 @@ class FeatureExtractor:
             ima3a[int(np.round(vx1[i])), int(np.round(vy1[i]))] = 1
             ima3b[int(np.round(vx2[i])), int(np.round(vy2[i]))] = 1
 
-        ima3a = self.dilate(ima3a)
-        ima3a = self.erode(ima3a)
+        ima3a = dilate(ima3a)
+        ima3a = erode(ima3a)
         for i in range(highX1):
             for j in range(highY1):
                 ima4a[i, j] = ima2a[i, j] + ima3a[i, j]
 
-        ima3b = self.dilate(ima3b)
-        ima3b = self.erode(ima3b)
+        ima3b = dilate(ima3b)
+        ima3b = erode(ima3b)
         for i in range(highX2):
             for j in range(highY2):
                 ima4b[i, j] = ima2b[i, j] + ima3b[i, j]
@@ -255,63 +314,6 @@ class FeatureExtractor:
                     sa_two += 1
 
         self.sym_less_pc = float(sa_one) / sa_two
-
-    def erode(self, ima: np.ndarray):
-        dx, dy = ima.shape
-        ima_temp = np.zeros((dx, 500), dtype=np.int)
-
-        for m in range(dx):
-            for n in range(dy):
-                ima_temp[m, n] = ima[m, n]
-
-        for m in range(1, dx-1):
-            for n in range(1, dy-1):
-                if ima_temp[m, n] == 1:
-                    aux = 1
-                    aux *= ima_temp[m, n]
-                    aux *= ima_temp[m-1, n]
-                    aux *= ima_temp[m+1, n]
-                    aux *= ima_temp[m, n-1]
-                    aux *= ima_temp[m, n+1]
-                    ima[m, n] = aux
-
-        for i in range(dx):
-            ima[i, 0] = 0
-            ima[i, dy-1] = 0
-
-        for i in range(dy):
-            ima[0, i] = 0
-            ima[dx-1, i] = 0
-
-        return ima
-
-    def dilate(self, ima):
-        '''
-        Morphological dilation of binary matrix ima using
-        as default the structuring element(SE)
-        [0 1 0
-         1 1 1
-         0 1 0]
-        :param ima: a binary array
-        :return:
-        '''
-        dx, dy = ima.shape
-        se = [[0, 1, 0], [1, 1, 1], [0, 1, 0]]
-        ima_temp = np.zeros((dx, 500), dtype=np.int)
-        for m in range(dx):
-            for n in range(dy):
-                ima_temp[m, n] = ima[m, n]
-
-        for m in range(1, dx-1):
-            for n in range(1, dy-1):
-                if ima_temp[m, n] == 1:
-                    for i in range(3):
-                        for j in range(3):
-                            mw = m-1
-                            nw = n-1
-                            if ima[mw+i, nw+j] == 0:
-                                ima[mw+i, nw+j] = ima[mw+i, nw+j] or se[i][j]
-        return ima
 
     def _round(self, x):
         f = np.vectorize(int)

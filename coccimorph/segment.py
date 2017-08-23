@@ -86,7 +86,7 @@ class Segmentator(object):
                 dpc = dcn
 
                 # w_vect = (next_pixel[0], next_pixel[1], dcn)
-                retvals = self.find_next(self.vx[-1], self.vy[-1], dpc)
+                retvals = self._find_next(self.vx[-1], self.vy[-1], dpc)
                 next_pixel = (retvals[0], retvals[1])
                 dcn = retvals[2]
                 n += 1
@@ -101,7 +101,7 @@ class Segmentator(object):
                             self.checkpoint = 1
                         i += 1
 
-    def find_next(self, pcx: int, pcy: int, dpc: int):
+    def _find_next(self, pcx: int, pcy: int, dpc: int):
         w2 = np.zeros(3, dtype=np.int)
         dcp = self.invert[dpc][1]
         for r in range(7):
