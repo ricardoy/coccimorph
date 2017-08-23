@@ -15,7 +15,7 @@ class TestMethods(unittest.TestCase):
     #     self.assertEqual(0, imbin[1][1])
 
     def test_contour(self):
-        basedir = os.path.dirname(__file__) + '/../data'
+        basedir = os.path.dirname(__file__) + '/data'
         img_filename = '%s/%s' % (basedir, 'ACE104.bmp')
         seg = Segmentator(img_filename, 140, None)
         seg.process_contour()
@@ -23,6 +23,7 @@ class TestMethods(unittest.TestCase):
         for a, b in zip(seg.vx, seg.vy):
             v.append((a, b))
         v = np.array(v)
+        
 
         countor_filename = '%s/%s' % (basedir, 'countor.csv')
         df  = pd.read_csv(countor_filename, header=-1)
