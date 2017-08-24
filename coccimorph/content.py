@@ -97,8 +97,8 @@ class FeatureExtractor:
     def __init__(self, filename, scale):
         self.img = load_image(filename, scale)
         self.height, self.width, _ = self.img.shape
-        # self.img_gray = np.array(np.average(self.img, axis=2), dtype=np.int)
         self.img_gray = cv2.cvtColor(self.img, cv2.COLOR_BGR2GRAY)
+
         self.ima = np.zeros((self.height, self.width), dtype=np.int)
         self.vx = []
         self.vy = []
@@ -115,6 +115,8 @@ class FeatureExtractor:
         for x in range(self.height):
             for y in range(self.width-d):
                 if self.ima[x, y] > 0 and self.ima[x, y + d] > 0:
+                    # if aux_mcc[self.ima[x, y], self.ima[x, y + d]] > 0:
+                    #     print(self.ima[x, y], self.ima[x, y + d], aux_mcc[self.ima[x, y], self.ima[x, y + d]])
                     aux_mcc[self.ima[x, y], self.ima[x, y + d]] += 1
                     ro += 1
 
@@ -122,11 +124,28 @@ class FeatureExtractor:
             y = self.width-1
             while y > d - 1:
                 if self.ima[x, y] > 0 and self.ima[x, y - d] > 0:
+                    # if aux_mcc[self.ima[x, y], self.ima[x, y - d]] > 0:
+                    #     print(self.ima[x, y], self.ima[x, y - d], aux_mcc[self.ima[x, y], self.ima[x, y - d]])
                     aux_mcc[self.ima[x, y], self.ima[x, y - d]] += 1
                     ro += 1
                 y -= 1
 
+        # print('ro', ro)
+
+        # self.ima.tofile('/tmp/ima_novo')
+
         self.mcc = aux_mcc / float(ro)
+
+        # with open('/tmp/mcc_novo', 'w') as fh:
+        #     for i in range(255):
+        #
+        #         for j in range(255):
+        #             fh.write('%.14f ' % (self.mcc[i][j]))
+        #
+        #         fh.write('%.14f' % (self.mcc[i][255]))
+        #         fh.write('\n')
+        #
+        # print('soma total mcc', np.sum(aux_mcc), np.std(self.mcc) ** 2)
 
     def mcc_asm(self):
         return np.sum(np.power(self.mcc, 2))
@@ -152,6 +171,8 @@ class FeatureExtractor:
                 if self.mcc[i, j] > 0:
                     sm += self.mcc[i, j]*np.log(self.mcc[i, j])
         return sm * sm / 2.
+        # sm = np.sum(self.mcc * np.log(self.mcc))
+        # return sm * sm / 2.0
 
     def eigens(self):
         c = np.zeros(4, dtype=np.float)
@@ -176,9 +197,13 @@ class FeatureExtractor:
         c[3] = sum3/n
 
         k = np.reshape(c, (-1, 2))
+        # print('k', k)
 
         # compute eigen vectors and eigen values
         eigenvalues, eigenvectors = np.linalg.eigh(k)
+        # print('autovalores', eigenvalues)
+        #
+        # print('eigenvectors\n', eigenvectors)
 
         evec_inv = np.linalg.inv(eigenvectors)
 
@@ -186,18 +211,25 @@ class FeatureExtractor:
         vx1 = np.zeros(n, dtype=np.float)
         vy1 = np.zeros(n, dtype=np.float)
 
-        sumvx1 = 0
-        sumvy1 = 0
+        # print('inversa: ', evec_inv)
+
         for i in range(n):
             vx_w = evec_inv[0, 0] * self.vx[i] + evec_inv[0, 1] * self.vy[i]
             vy_w = evec_inv[1, 0] * self.vx[i] + evec_inv[1, 1] * self.vy[i]
-            sumvx1 += vx_w
-            sumvy1 += vy_w
             vx1[i] = vx_w
             vy1[i] = vy_w
 
-        meanvx1 = sumvx1 / float(n)
-        meanvy1 = sumvy1 / float(n)
+        # vx1 = -1 * vx1
+        # vy1 = -1 * vy1
+        # with open('/tmp/novo', 'w') as fh:
+        #     fh.write('valor de vx1\n')
+        #     for blah in vx1:
+        #         fh.write(str(blah))
+        #         fh.write('\n')
+        # exit()
+
+        meanvx1 = np.average(vx1)
+        meanvy1 = np.average(vy1)
 
         vx1 = vx1 - meanvx1
         vy1 = vy1 - meanvy1
@@ -205,10 +237,28 @@ class FeatureExtractor:
         vy2 = np.copy(vy1)
 
         # searching for diameters
-        highX = np.max(vx1)
-        lessX = np.min(vx1)
-        highY = np.max(vy1)
-        lessY = np.min(vy1)
+        # highX = np.max(vx1)
+        # lessX = np.min(vx1)
+        # highY = np.max(vy1)
+        # lessY = np.min(vy1)
+        highX = -999999999999.
+        lessX = 999999999999.
+        highY = -999999999999.
+        lessY = 999999999999.
+        for i in range(len(self.vx)):
+            if int(vx1[i]) == 0 and vy1[i] > highY:
+                highY = vy1[i]
+            if int(vx1[i]) == 0 and vy1[i] < lessY:
+                lessY = vy1[i]
+            if int(vy1[i]) == 0 and vx1[i] > highX:
+                highX = vx1[i]
+            if int(vy1[i]) == 0 and vx1[i] < lessX:
+                lessX = vx1[i]
+
+        # print('meanvx1', meanvx1, 'meanvy1', meanvy1)
+        # print('highX', highX, 'lessX', lessX)
+        # print('highY', highY, 'lessY', lessY)
+        # print('high diameter', (highY - lessY + 1))
 
         self.high_diameter = highY - lessY + 1
         self.less_diameter = highX - lessX + 1
@@ -242,14 +292,27 @@ class FeatureExtractor:
             vy2[i] = vy_w
 
         # compute the simmetry
+        highX1 = -999999999999.
+        highY1 = -999999999999.
+        highX2 = -999999999999.
+        highY2 = -999999999999.
+        for i in range(len(self.vx)):
+            if int(round(vx1[i])) > highX1:
+                highX1 = int(round(vx1[i]))
+            if int(round(vy1[i])) > highY1:
+                highY1 = int(round(vy1[i]))
+            if int(round(vx2[i])) > highX2:
+                highX2 = int(round(vx2[i]))
+            if int(round(vy2[i])) > highY2:
+                highY2 = int(round(vy2[i]))
         """        
         TODO: original program was +3... this and the 500 columns look like
         hard constraints over the image size 
         """
-        highX1 = np.max(self._round(vx1)) + 3
-        highY1 = np.max(self._round(vy1)) + 3
-        highX2 = np.max(self._round(vx2)) + 3
-        highY2 = np.max(self._round(vy2)) + 3
+        highX1 += 3
+        highY1 += 3
+        highX2 += 3
+        highY2 += 3
 
         # create temporal matrices to compute erosion, dilation and rate simmetry
         ima3a = np.zeros((highX1, highY1))
@@ -347,8 +410,10 @@ class FeatureExtractor:
         # print(len(f2))
         # print('cx:', cx)
         # print('cy:', cy)
+        # print('average:', np.average(self.img_gray))
 
         self.ima[cx][cy] = int(self.img_gray[cx, cy])
+        # print('centro', int(self.img_gray[cx, cy]))
         sm += self.ima[cx][cy] * np.log(self.ima[cx][cy])
 
         self.vx.append(cx)
@@ -388,13 +453,30 @@ class FeatureExtractor:
 
         # print('entropy:', self.obj_entropy)
         # print('size:', self.obj_size)
+        #
+        # print('height', self.height, 'width', self.width)
+        #
+
+        # print('pixel', self.img[65, 135]) #  [240 254 243]
+        # print('gray: ', self.img_gray[65, 135]) # 249 here, 250 c++
+
+        # print('pixel', self.img[65, 136])
+        # print('gray: ', self.img_gray[65, 136])
+        #
+        #
+        # for i in range(self.height):
+        #     print('aaa')
+        #     for j in range(self.width):
+        #         print(i, j, self.ima[i][j], end=', ')
+        #
+        # print(self.ima.shape)
 
     def contour_and_entropy(self, i, j):
         if self.ima[i, j] == 0:
             self.vx.append(i)
             self.vy.append(j)
             self.ima[i, j] = self.img_gray[i, j]
-            self.wEnt[self.ima[i, j]] = 1 + self.wEnt[self.ima[i, j]]
+            self.wEnt[self.ima[i, j]] = self.wEnt[self.ima[i, j]] + 1
 
 
 def generate_similarity_classifier_fowl():

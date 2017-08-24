@@ -12,17 +12,20 @@ import numpy as np
 def printf(label, num):
     print('%s %.3e' % (label, num))
 
+def printi(label, num):
+    print('%s %d' % (label, int(num)))
+
 
 def output_xvector(xvector):
     print()
     printf('Mean of curvature:', xvector[0])
     printf('Standard deviation from curvature:', xvector[1])
     printf('Entropy of curvature:', xvector[2])
-    printf('Largest diameter:', xvector[3])
-    printf('Smallest diameter:', xvector[4])
+    printi('Largest diameter:', xvector[3])
+    printi('Smallest diameter:', xvector[4])
     printf('Symmetry based on first principal component:', xvector[5])
     printf('Symmetry based on second principal component:', xvector[6])
-    printf('Total number of pixels:', xvector[7])
+    printi('Total number of pixels:', xvector[7])
     printf('Entropy of image content:', xvector[8])
     printf('Angular second moment from co-occurrence matrix:', xvector[9])
     printf('Contrast from co-occurrence matrix:', xvector[10])
@@ -38,11 +41,6 @@ def predict(filename, threshold, scale, fowl, rabbit):
     f1 = seg.vx
     f2 = seg.vy
 
-    with open('/tmp/xxx.txt', 'w') as fh:
-        for a, b  in zip(f1, f2):
-            fh.write('%d,%d' % (a, b))
-            fh.write('\n')
-
     n = len(f1)
     sigma = 10
 
@@ -52,8 +50,27 @@ def predict(filename, threshold, scale, fowl, rabbit):
     d1y = fftderiv(f2, 1, sigma, n)
     d2y = fftderiv(f2, 2, sigma, n)
 
+    # with open('/tmp/novo', 'w') as fh:
+    #     fh.write('d1x\n')
+    #     for x in d1x:
+    #         fh.write(str(x))
+    #         fh.write('\n')
+
+    # with open('/tmp/novo', 'w') as fh:
+    #     fh.write('d2x\n')
+    #     for x in d2x:
+    #         fh.write(str(x))
+    #         fh.write('\n')
+
+
     # curvature K and its moments
     k = (d1x * d2y - d1y * d2x) / np.power(np.power(d1x, 2) + np.power(d1y, 2), 1.5)
+
+    # with open('/tmp/novo', 'w') as fh:
+    #     fh.write('k\n')
+    #     for x in k:
+    #         fh.write(str(x))
+    #         fh.write('\n')
 
     xvector = []
     xvector.append(np.average(k))

@@ -4,6 +4,12 @@ from coccimorph.content import generate_probability_classifier_rabbit
 from coccimorph.content import generate_probability_classifier_fowl
 from coccimorph.content import generate_similarity_classifier_fowl
 from coccimorph.content import generate_similarity_classifier_rabbit
+from coccimorph.content import FeatureExtractor
+from coccimorph.segment import Segmentator
+from coccimorph.functions import fftderiv, entropy
+import numpy as np
+import os
+import pandas as pd
 import unittest
 
 rabbit_map = dict()
@@ -100,6 +106,55 @@ class TestMethods(unittest.TestCase):
             0.107968,
             38.2667
         ]
+
+        c = generate_similarity_classifier_fowl()
+        taxa_acerto = c.classify(xvector)
+        self.assertAlmostEqual(76.80, taxa_acerto[fowl_map['E. acervulina']], delta=.01)
+        self.assertAlmostEqual(14.87, taxa_acerto[fowl_map['E. mitis']], delta=.01)
+        self.assertAlmostEqual(13.95, taxa_acerto[fowl_map['E. necatrix']], delta=.01)
+
+    def test_fowl_similarity_classifier_after_gray_image(self):
+        basedir = os.path.dirname(__file__) + '/data'
+        img_filename = '%s/%s' % (basedir, 'ACE104.bmp')
+        seg = Segmentator(img_filename, 140, None)
+        seg.process_contour()
+
+        f1 = seg.vx
+        f2 = seg.vy
+
+        n = len(f1)
+        sigma = 10
+
+        d1x = fftderiv(f1, 1, sigma, n)
+        d2x = fftderiv(f1, 2, sigma, n)
+        d1y = fftderiv(f2, 1, sigma, n)
+        d2y = fftderiv(f2, 2, sigma, n)
+
+        k = (d1x * d2y - d1y * d2x) / np.power(np.power(d1x, 2) + np.power(d1y, 2), 1.5)
+
+        xvector = []
+        xvector.append(np.average(k))
+        xvector.append(np.std(k))
+        xvector.append(entropy(k))
+
+        feature_extractor = FeatureExtractor(img_filename, None)
+        gray_image = pd.read_csv('%s/%s' % (basedir, 'gray_image.csv'), sep=' ', header=None).as_matrix()
+        feature_extractor.img_gray = gray_image
+
+        feature_extractor.content_read(f1, f2, n)
+        feature_extractor.set_co_matrix(2)
+        feature_extractor.eigens()
+
+        xvector.append(feature_extractor.high_diameter)
+        xvector.append(feature_extractor.less_diameter)
+        xvector.append(feature_extractor.sym_high_pc)
+        xvector.append(feature_extractor.sym_less_pc)
+        xvector.append(feature_extractor.obj_size)
+        xvector.append(feature_extractor.obj_entropy)
+        xvector.append(feature_extractor.mcc_asm())
+        xvector.append(feature_extractor.mcc_con())
+        xvector.append(feature_extractor.mcc_idf())
+        xvector.append(feature_extractor.mcc_ent())
 
         c = generate_similarity_classifier_fowl()
         taxa_acerto = c.classify(xvector)
