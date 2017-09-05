@@ -525,7 +525,6 @@ class ClassificaGauss(object):
         self.species = species
 
     def classify(self, x):
-        print('\nSimilarity classification:')
         class_density_value = []
         for i, kl_w in enumerate(self.kl):
             class_density_value.append(self._find_class_density(x, kl_w, i + 1))
@@ -538,11 +537,12 @@ class ClassificaGauss(object):
             if class_density_value[i] > 0.0:
                taxa_acerto[i] = class_density_value[i] * 100. / self.acerto_medio[i]
 
+        classification = dict()
         for i in reversed(np.argsort(taxa_acerto)):
             if taxa_acerto[i] > 0.0:
-                print('%s: %.4f' % (self.species[i], taxa_acerto[i]))
+                classification[self.species[i]] = taxa_acerto[i]
 
-        return taxa_acerto
+        return classification
 
     def _find_class_density(self, x, kl_w, w_especie):
         gx = .0
@@ -590,8 +590,7 @@ def generate_probability_classifier_rabbit():
         fq.append(np.array(read_csv(basedir, filename), dtype=np.float64))
     per_w = read_csv(basedir, 'PerRabbit.txt')
     vpriori = np.repeat(0.090909091, 11)
-    taxa_acerto = np.zeros(11, dtype=np.float)
-    return ClassificaProb(fq, per_w, vpriori, taxa_acerto, rabbit_species)
+    return ClassificaProb(fq, per_w, vpriori, rabbit_species)
 
 
 def generate_probability_classifier_fowl():
@@ -601,21 +600,18 @@ def generate_probability_classifier_fowl():
         fq.append(np.array(read_csv(basedir, filename), dtype=np.float64))
     per_w = read_csv(basedir, 'PerFowl.txt')
     vpriori = np.repeat(0.14285, 7)
-    taxa_acerto = np.zeros(7, dtype=np.float)
-    return ClassificaProb(fq, per_w, vpriori, taxa_acerto, fowl_species)
+    return ClassificaProb(fq, per_w, vpriori, fowl_species)
 
 
 class ClassificaProb:
-    def __init__(self, fq, per_w, vpriori, taxa_acerto, species):
+    def __init__(self, fq, per_w, vpriori, species):
         self.fq = fq
         self.per_w = per_w
         self.vpriori = vpriori
-        self.taxa_acerto = taxa_acerto
         self.species = species
         self.nclass = len(species)
 
     def classify(self, x):
-        print('Probability classification:')
         self._find_posteriori(x, self.fq[0], self.fq[0], 0)
         for i in range(1, 13):
             self._find_posteriori(x, self.fq[i - 1], self.fq[i], i)
@@ -627,11 +623,12 @@ class ClassificaProb:
         classification.
         """
         wflag = False
+        taxa_acerto = np.zeros(self.nclass, dtype=np.float)
         for wcont in range(self.nclass):
             wper = self.per_w[12, wcont]
             if not wflag and x[12] <= wper:
                 for i in range(self.nclass):
-                    self.taxa_acerto[i] = self.fq[-1][i, wcont] * 100
+                    taxa_acerto[i] = self.fq[-1][i, wcont] * 100
                 wflag = True
 
         if not wflag:
@@ -640,11 +637,14 @@ class ClassificaProb:
             in last percentil
             """
             for i in range(self.nclass):
-                self.taxa_acerto[i] = self.fq[-1][i, -1] * 100
+                taxa_acerto[i] = self.fq[-1][i, -1] * 100
 
-        for i in reversed(np.argsort(self.taxa_acerto)):
-            if self.taxa_acerto[i] > 1e-4:
-                print('%s: %.4f' % (self.species[i], self.taxa_acerto[i]))
+        classification = dict()
+        for i in reversed(np.argsort(taxa_acerto)):
+            if taxa_acerto[i] > 1e-4:
+                classification[self.species[i]] = taxa_acerto[i]
+
+        return classification
 
     def _find_posteriori(self, x, fq0, fq2, w_feature):
         """

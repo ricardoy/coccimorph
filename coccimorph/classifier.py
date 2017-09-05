@@ -9,32 +9,58 @@ import argparse
 import numpy as np
 
 
-def printf(label, num):
-    print('%s %.3e' % (label, num))
+def float_feature_to_string(label, num):
+    return (label, '%.3e' % (num))
 
-def printi(label, num):
-    print('%s %d' % (label, int(num)))
+
+def integer_feature_to_string(label, num):
+    return (label, int(num))
+
+
+def get_feature_labels_and_values(xvector):
+    s = []
+    s.append(float_feature_to_string('Mean of curvature', xvector[0]))
+    s.append(float_feature_to_string('Standard deviation from curvature', xvector[1]))
+    s.append(float_feature_to_string('Entropy of curvature', xvector[2]))
+    s.append(integer_feature_to_string('Largest diameter', xvector[3]))
+    s.append(integer_feature_to_string('Smallest diameter', xvector[4]))
+    s.append(float_feature_to_string('Symmetry based on first principal component', xvector[5]))
+    s.append(float_feature_to_string('Symmetry based on second principal component', xvector[6]))
+    s.append(integer_feature_to_string('Total number of pixels', xvector[7]))
+    s.append(float_feature_to_string('Entropy of image content', xvector[8]))
+    s.append(float_feature_to_string('Angular second moment from co-occurrence matrix', xvector[9]))
+    s.append(float_feature_to_string('Contrast from co-occurrence matrix', xvector[10]))
+    s.append(float_feature_to_string('Inverse difference moment from co-occurrence matrix', xvector[11]))
+    s.append(float_feature_to_string('Entropy of co-occurence matrix', xvector[12]))
+    return s
+
+
+def get_feature_labels_and_raw_values(xvector):
+    s = []
+    s.append(('Mean of curvature', xvector[0]))
+    s.append(('Standard deviation from curvature', xvector[1]))
+    s.append(('Entropy of curvature', xvector[2]))
+    s.append(('Largest diameter', xvector[3]))
+    s.append(('Smallest diameter', xvector[4]))
+    s.append(('Symmetry based on first principal component', xvector[5]))
+    s.append(('Symmetry based on second principal component', xvector[6]))
+    s.append(('Total number of pixels', xvector[7]))
+    s.append(('Entropy of image content', xvector[8]))
+    s.append(('Angular second moment from co-occurrence matrix', xvector[9]))
+    s.append(('Contrast from co-occurrence matrix', xvector[10]))
+    s.append(('Inverse difference moment from co-occurrence matrix', xvector[11]))
+    s.append(('Entropy of co-occurence matrix', xvector[12]))
+    return s
 
 
 def output_xvector(xvector):
     print()
-    printf('Mean of curvature:', xvector[0])
-    printf('Standard deviation from curvature:', xvector[1])
-    printf('Entropy of curvature:', xvector[2])
-    printi('Largest diameter:', xvector[3])
-    printi('Smallest diameter:', xvector[4])
-    printf('Symmetry based on first principal component:', xvector[5])
-    printf('Symmetry based on second principal component:', xvector[6])
-    printi('Total number of pixels:', xvector[7])
-    printf('Entropy of image content:', xvector[8])
-    printf('Angular second moment from co-occurrence matrix:', xvector[9])
-    printf('Contrast from co-occurrence matrix:', xvector[10])
-    printf('Inverse difference moment from co-occurrence matrix:', xvector[11])
-    printf('Entropy of co-occurence matrix:', xvector[12])
+    for label, value in get_feature_labels_and_values(xvector):
+        print('{}: {}'.format(label, value))
     print()
 
 
-def predict(filename, threshold, scale, fowl, rabbit):
+def predict(filename, threshold, scale, fowl, rabbit, output_data=False):
     seg = Segmentator(filename, threshold, scale)
     seg.process_contour()
 
@@ -93,19 +119,32 @@ def predict(filename, threshold, scale, fowl, rabbit):
     xvector.append(feature_extractor.mcc_idf())
     xvector.append(feature_extractor.mcc_ent())
 
-    output_xvector(xvector)
-
     if fowl:
         prob_classifier = generate_probability_classifier_fowl()
-        prob_classifier.classify(xvector)
+        prob_result = prob_classifier.classify(xvector)
         simi_classifier = generate_similarity_classifier_fowl()
-        simi_classifier.classify(xvector)
+        simi_result = simi_classifier.classify(xvector)
     if rabbit:
         prob_classifier = generate_probability_classifier_rabbit()
-        prob_classifier.classify(xvector)
+        prob_result = prob_classifier.classify(xvector)
         simi_classifier = generate_similarity_classifier_rabbit()
-        simi_classifier.classify(xvector)
+        simi_result = simi_classifier.classify(xvector)
 
+    if output_data:
+        output_xvector(xvector)
+        print('\nProbability classification:')
+        for label, value in prob_result.items():
+            print('%s: %.4f' % (label, value))
+        print('\nSimilarity classification:')
+        for label, value in simi_result.items():
+            print('%s: %.4f' % (label, value))
+        print()
+
+    return {
+        'features': get_feature_labels_and_raw_values(xvector),
+        'probability': prob_result,
+        'similarity': simi_result
+    }
 
 
 if __name__ == '__main__':
@@ -120,4 +159,4 @@ if __name__ == '__main__':
         parser.print_help()
         exit(-1)
     if args.input_file is not None and args.threshold is not None:
-        predict(args.input_file, args.threshold, args.scale, args.fowl, args.rabbit)
+        predict(args.input_file, args.threshold, args.scale, args.fowl, args.rabbit, True)
