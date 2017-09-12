@@ -241,10 +241,10 @@ class FeatureExtractor:
         # lessX = np.min(vx1)
         # highY = np.max(vy1)
         # lessY = np.min(vy1)
-        highX = -999999999999.
-        lessX = 999999999999.
-        highY = -999999999999.
-        lessY = 999999999999.
+        highX = float('-Inf')
+        lessX = float('Inf')
+        highY = float('-Inf')
+        lessY = float('Inf')
         for i in range(len(self.vx)):
             if int(vx1[i]) == 0 and vy1[i] > highY:
                 highY = vy1[i]
@@ -292,10 +292,10 @@ class FeatureExtractor:
             vy2[i] = vy_w
 
         # compute the simmetry
-        highX1 = -999999999999.
-        highY1 = -999999999999.
-        highX2 = -999999999999.
-        highY2 = -999999999999.
+        highX1 = float('-Inf')
+        highY1 = float('-Inf')
+        highX2 = float('-Inf')
+        highY2 = float('-Inf')
         for i in range(len(self.vx)):
             if int(round(vx1[i])) > highX1:
                 highX1 = int(round(vx1[i]))

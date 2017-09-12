@@ -1,5 +1,3 @@
-from coccimorph.content import rabbit_species
-from coccimorph.content import fowl_species
 from coccimorph.content import generate_probability_classifier_rabbit
 from coccimorph.content import generate_probability_classifier_fowl
 from coccimorph.content import generate_similarity_classifier_fowl
@@ -11,14 +9,6 @@ import numpy as np
 import os
 import pandas as pd
 import unittest
-
-rabbit_map = dict()
-for i, s in enumerate(rabbit_species):
-    rabbit_map[s] = i
-
-fowl_map = dict()
-for i, s in enumerate(fowl_species):
-    fowl_map[s] = i
 
 
 class TestMethods(unittest.TestCase):
@@ -39,14 +29,14 @@ class TestMethods(unittest.TestCase):
             3.335e+01
         ]
         c = generate_probability_classifier_rabbit()
-        c.classify(xvector)
-        self.assertAlmostEqual(52.95, c.taxa_acerto[rabbit_map['E. coecicola']], delta=.01)
-        self.assertAlmostEqual(23.42, c.taxa_acerto[rabbit_map['E. media']], delta=.01)
-        self.assertAlmostEqual(18.91, c.taxa_acerto[rabbit_map['E. vejdovskyi']], delta=.01)
-        self.assertAlmostEqual(2.0, c.taxa_acerto[rabbit_map['E. flavescens']], delta=.01)
-        self.assertAlmostEqual(1.41, c.taxa_acerto[rabbit_map['E. piriformis']], delta=.01)
-        self.assertAlmostEqual(1.31, c.taxa_acerto[rabbit_map['E. intestinalis']], delta=.01)
-        self.assertAlmostEqual(0.0, c.taxa_acerto[rabbit_map['E. magna']], delta=.01)
+        r = c.classify(xvector)
+        self.assertAlmostEqual(52.95, r['E. coecicola'], delta=.01)
+        self.assertAlmostEqual(23.42, r['E. media'], delta=.01)
+        self.assertAlmostEqual(18.91, r['E. vejdovskyi'], delta=.01)
+        self.assertAlmostEqual(2.0, r['E. flavescens'], delta=.01)
+        self.assertAlmostEqual(1.41, r['E. piriformis'], delta=.01)
+        self.assertAlmostEqual(1.31, r['E. intestinalis'], delta=.01)
+        self.assertIsNone(r.get('E. magna'))
 
     def test_fowl_probability_classifier(self):
         xvector = [
@@ -65,9 +55,9 @@ class TestMethods(unittest.TestCase):
             3.827e+01
         ]
         c = generate_probability_classifier_fowl()
-        c.classify(xvector)
-        self.assertAlmostEqual(99.30, c.taxa_acerto[fowl_map['E. acervulina']], delta=.01)
-        self.assertAlmostEqual(0.70, c.taxa_acerto[fowl_map['E. mitis']], delta=.01)
+        r = c.classify(xvector)
+        self.assertAlmostEqual(99.30, r['E. acervulina'], delta=.01)
+        self.assertAlmostEqual(0.70, r['E. mitis'], delta=.01)
 
     def test_rabbit_similarity_classifier(self):
         xvector = [
@@ -87,8 +77,8 @@ class TestMethods(unittest.TestCase):
         ]
 
         c = generate_similarity_classifier_rabbit()
-        taxa_acerto = c.classify(xvector)
-        self.assertAlmostEqual(67.35, taxa_acerto[rabbit_map['E. exigua']], delta=.01)
+        r = c.classify(xvector)
+        self.assertAlmostEqual(67.35, r['E. exigua'], delta=.01)
 
     def test_fowl_similarity_classifier(self):
         xvector = [
@@ -108,10 +98,10 @@ class TestMethods(unittest.TestCase):
         ]
 
         c = generate_similarity_classifier_fowl()
-        taxa_acerto = c.classify(xvector)
-        self.assertAlmostEqual(76.80, taxa_acerto[fowl_map['E. acervulina']], delta=.01)
-        self.assertAlmostEqual(14.87, taxa_acerto[fowl_map['E. mitis']], delta=.01)
-        self.assertAlmostEqual(13.95, taxa_acerto[fowl_map['E. necatrix']], delta=.01)
+        r = c.classify(xvector)
+        self.assertAlmostEqual(76.80, r['E. acervulina'], delta=.01)
+        self.assertAlmostEqual(14.87, r['E. mitis'], delta=.01)
+        self.assertAlmostEqual(13.95, r['E. necatrix'], delta=.01)
 
     def test_fowl_similarity_classifier_after_gray_image(self):
         basedir = os.path.dirname(__file__) + '/data'
@@ -157,10 +147,10 @@ class TestMethods(unittest.TestCase):
         xvector.append(feature_extractor.mcc_ent())
 
         c = generate_similarity_classifier_fowl()
-        taxa_acerto = c.classify(xvector)
-        self.assertAlmostEqual(76.80, taxa_acerto[fowl_map['E. acervulina']], delta=.01)
-        self.assertAlmostEqual(14.87, taxa_acerto[fowl_map['E. mitis']], delta=.01)
-        self.assertAlmostEqual(13.95, taxa_acerto[fowl_map['E. necatrix']], delta=.01)
+        r = c.classify(xvector)
+        self.assertAlmostEqual(76.80, r['E. acervulina'], delta=.01)
+        self.assertAlmostEqual(14.87, r['E. mitis'], delta=.01)
+        self.assertAlmostEqual(13.95, r['E. necatrix'], delta=.01)
 
 if __name__ == '__main__':
     unittest.main()

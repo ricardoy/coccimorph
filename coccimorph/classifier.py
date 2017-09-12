@@ -10,15 +10,15 @@ import numpy as np
 
 
 def float_feature_to_string(label, num):
-    return (label, '%.3e' % (num))
+    return label, '%.3e' % num
 
 
 def integer_feature_to_string(label, num):
-    return (label, int(num))
+    return label, int(num)
 
 
 def get_feature_labels_and_values(xvector):
-    s = []
+    s = list()
     s.append(float_feature_to_string('Mean of curvature', xvector[0]))
     s.append(float_feature_to_string('Standard deviation from curvature', xvector[1]))
     s.append(float_feature_to_string('Entropy of curvature', xvector[2]))
@@ -36,7 +36,7 @@ def get_feature_labels_and_values(xvector):
 
 
 def get_feature_labels_and_raw_values(xvector):
-    s = []
+    s = list()
     s.append(('Mean of curvature', xvector[0]))
     s.append(('Standard deviation from curvature', xvector[1]))
     s.append(('Entropy of curvature', xvector[2]))
@@ -88,7 +88,6 @@ def predict(filename, threshold, scale, fowl, rabbit, output_data=False):
     #         fh.write(str(x))
     #         fh.write('\n')
 
-
     # curvature K and its moments
     k = (d1x * d2y - d1y * d2x) / np.power(np.power(d1x, 2) + np.power(d1y, 2), 1.5)
 
@@ -98,7 +97,7 @@ def predict(filename, threshold, scale, fowl, rabbit, output_data=False):
     #         fh.write(str(x))
     #         fh.write('\n')
 
-    xvector = []
+    xvector = list()
     xvector.append(np.average(k))
     xvector.append(np.std(k))
     xvector.append(entropy(k))
