@@ -1,6 +1,9 @@
-import numpy as np
-import cv2
 import argparse
+
+import cv2
+import numpy as np
+
+from coccimorph.aux import load_image
 
 
 class Segmentator(object):
@@ -148,16 +151,6 @@ def binaryze(img, threshold):
     img_bin = binarizer(img_grayscale)
     # print("primeiro pixel", img_grayscale[0, 0], "cores:", img[0, 0])
     return img_bin
-
-
-def load_image(filename, scale):
-    img = cv2.imread(filename)
-    height, width, _ = img.shape
-    if scale is not None:
-        width = int(width / (scale / 11.))
-        height = int(height / (scale / 11.))
-        img = cv2.resize(img, (width, height))
-    return np.transpose(img, axes=[1, 0, 2])
 
 
 def segment(filename, threshold, binary_file, segmented_file, scale=None):

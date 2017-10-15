@@ -1,8 +1,7 @@
 import numpy as np
 
 
-# PI = np.pi
-PI = 3.1415927
+PI = np.pi
 
 
 # Implementing methods from functions.h

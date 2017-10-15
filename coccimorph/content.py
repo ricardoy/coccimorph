@@ -2,7 +2,7 @@ import math
 import numpy as np
 import os
 import pandas as pd
-from coccimorph.segment import load_image
+from coccimorph.aux import load_image
 import cv2
 
 
