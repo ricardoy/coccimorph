@@ -1,0 +1,20 @@
+<!doctype html>
+<title>Coccimorph</title>
+
+
+{% block body %}
+<h1>Upload file</h1>
+<h3>User id: {{uid}}</h3>
+
+{% if filename is not none %}
+<img src="/uploads/{{filename}}" alt="oocyst image"/>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data">
+    <p>
+        <input type="file" name="oocyst_file" />
+        <input type="submit" value="Upload image" />
+    </p>
+</form>
+
+{% endblock %}

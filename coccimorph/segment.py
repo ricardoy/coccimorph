@@ -1,8 +1,6 @@
 import argparse
-
 import cv2
 import numpy as np
-
 from coccimorph.aux import load_image
 
 
