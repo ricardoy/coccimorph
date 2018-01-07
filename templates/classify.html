@@ -7,14 +7,63 @@
 <h3>User id: {{uid}}</h3>
 
 {% if filename is not none %}
-<img src="/uploads/{{filename}}" alt="oocyst image"/>
+<img src="/uploads/raw_{{filename}}?{{suffix}}" alt="oocyst image"/>
+<!--<img src="data:image/png;base64, {{raw_data}}" alt="Oocyst image" />-->
+<img src="/uploads/bin_{{filename}}?{{suffix}}" alt="binary image"/>
+<img src="/uploads/seg_{{filename}}?{{suffix}}" alt="segmented image"/>
+
+<form method="post" action="/preproc">
+    Host:
+    <select name="species">
+        {% if species=='FOWL' %}
+        <option value="FOWL" selected="selected">Domestic Fowl</option>
+        <option value="RABBIT">Domestic Rabbit</option>
+        {% else %}
+        <option value="FOWL">Domestic Fowl</option>
+        <option value="RABBIT" selected="selected">Domestic Rabbit</option>
+        {% endif %}
+    </select>
+
+    <br>
+
+    Scale:
+    {% if scale is not none %}
+    <input type="text" name="scale" value="{{scale}}"/>
+    {% else %}
+    <input type="text" name="scale" />
+    {% endif %}
+
+    <br>
+
+    Segmentation threshold:
+    {% if threshold is not none %}
+    <input type="text" name="threshold" value="{{threshold}}" />
+    {% else %}
+    <input type="text" name="threshold" value="150" />
+    {% endif %}
+
+    <br>
+    <input type="submit" value="Preprocessing" />
+</form>
 {% endif %}
 
-<form method="post" enctype="multipart/form-data">
+<form method="post" enctype="multipart/form-data" action="/upload_image">
     <p>
         <input type="file" name="oocyst_file" />
         <input type="submit" value="Upload image" />
     </p>
 </form>
+
+<form method="post" action="/predict">
+    <input type="submit" value="Classify" />
+</form>
+
+{% if classification is not none %}
+<div>
+    <pre>
+        {{classification}}
+    </pre>
+</div>
+{% endif %}
 
 {% endblock %}
