@@ -35,7 +35,9 @@ def render_classify_page():
                            species=session['species'],
                            scale=session['scale'],
                            suffix=uuid.uuid4().__str__(),
-                           classification=session['classification']
+                           classification=session['classification'],
+                           probability=session['probability'],
+                           similarity=session['similarity']
                            )
 
 
@@ -64,6 +66,12 @@ def index():
 
     if 'classification' not in session:
         session['classification'] = None
+
+    if 'similarity' not in session:
+        session['similarity'] = None
+
+    if 'probability' not in session:
+        session['probability'] = None
 
     return render_classify_page()
 
@@ -147,7 +155,10 @@ def predict():
         rabbit,
         True
     )
+
     session['classification'] = classification
+    session['similarity'] = sorted([d for d in classification['similarity'].items()], key=lambda x: x[1], reverse=True)
+    session['probability'] = sorted([d for d in classification['probability'].items()], key=lambda x: x[1], reverse=True)
 
     return render_classify_page()
 
