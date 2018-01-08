@@ -124,12 +124,14 @@ def preproc():
 @app.route('/predict', methods=['POST', 'GET'])
 def predict():
     print('oi')
-    if session['species'] == FOWL:
+    if request.form['species'] == FOWL:
         fowl = True
         rabbit = False
+        session['species'] = FOWL
     else:
         fowl = False
         rabbit = True
+        session['species'] = RABBIT
 
     scale = session['scale']
     if scale is not None and scale != '':
@@ -158,8 +160,6 @@ def segment(filename, threshold, binfile, segfile, scale):
 
     threshold = int(threshold)
 
-    # app.logger.debug('scale', scale)
-    # app.logger.debug('threshold', threshold)
     print('scale: ', scale)
     print('threshold: ', threshold)
 
