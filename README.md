@@ -5,10 +5,9 @@ This is a pure Python 3 implementation of [COCCIMORPH](http://www.coccidia.icb.u
 ## Installation
 
 ```bash
-$ conda create --name coccimorph biopython
+$ conda create --name coccimorph python=3.6
 $ source activate coccimorph
-$ python -m ipykernel install --name coccimorph --user
-$ pip install pandas opencv-python numpy
+$ pip install -r requirements.txt
 ```
 
 Before running the scripts:
@@ -63,3 +62,13 @@ E. necatrix: 28.1404
 E. mitis: 7.0517
 
 ```
+
+## Running the web interface
+
+Run the following command:
+
+```bash
+$ python server.py
+```
+
+Then, open the URL [http://localhost:8080](http://localhost:8080).
