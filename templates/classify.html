@@ -51,142 +51,137 @@
 
 
         {% block body %}
-        <h1>Coccimorph</h1>
+
         <!--<h3>User id: {{uid}}</h3>-->
 
         <div class="container">
 
-        {% if filename is not none %}
+            <h1>Coccimorph</h1>
 
-        <div class="form-group row">
-            <!--<label for="raw">Original</label>-->
-            <img id="raw" src="/uploads/raw_{{filename}}?{{suffix}}" alt="oocyst image"/>
-        <!--<img src="data:image/png;base64, {{raw_data}}" alt="Oocyst image" />-->
-            <img src="/uploads/bin_{{filename}}?{{suffix}}" alt="binary image"/>
-            <img src="/uploads/seg_{{filename}}?{{suffix}}" alt="segmented image"/>
-        </div>
-
-
-
-        <form method="post" action="/preproc">
-            <div class="form-group row">
-                <label class="col-3 col-form-label">Host</label>
-                <div class="col-2">
-                    <select name="species" class="custom-select">
-                        {% if species=='FOWL' %}
-                        <option value="FOWL" selected="selected">Domestic Fowl</option>
-                        <option value="RABBIT">Domestic Rabbit</option>
-                        {% else %}
-                        <option value="FOWL">Domestic Fowl</option>
-                        <option value="RABBIT" selected="selected">Domestic Rabbit</option>
-                        {% endif %}
-                    </select>
+            {% if filename is not none %}
+                <div class="form-group row">
+                    <!--<label for="raw">Original</label>-->
+                    <img id="raw" src="/uploads/raw_{{filename}}?{{suffix}}" alt="oocyst image"/>
+                <!--<img src="data:image/png;base64, {{raw_data}}" alt="Oocyst image" />-->
+                    <img src="/uploads/bin_{{filename}}?{{suffix}}" alt="binary image"/>
+                    <img src="/uploads/seg_{{filename}}?{{suffix}}" alt="segmented image"/>
                 </div>
+
+
+
+                <form method="post" action="/preproc">
+                    <div class="form-group row">
+                        <label class="col-3 col-form-label">Host</label>
+                        <div class="col-3">
+                            <select name="species" class="custom-select">
+                                {% if species=='FOWL' %}
+                                    <option value="FOWL" selected="selected">Domestic Fowl</option>
+                                    <option value="RABBIT">Domestic Rabbit</option>
+                                {% else %}
+                                    <option value="FOWL">Domestic Fowl</option>
+                                    <option value="RABBIT" selected="selected">Domestic Rabbit</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+
+
+                    <div class="form-group row">
+                        <label class="col-3 col-form-label">Scale</label>
+                        <div class="col-2">
+                            {% if scale is not none %}
+                                <input type="text" name="scale" value="{{scale}}" class="form-control" />
+                            {% else %}
+                                <input type="text" name="scale" class="form-control" />
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-3 col-form-label">Segmentation threshold</label>
+                        <div class="col-2">
+                            {% if threshold is not none %}
+                                <input type="number" name="threshold" value="{{threshold}}" class="form-control" />
+                            {% else %}
+                                <input type="number" name="threshold" value="150" class="form-control" />
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="submit" value="Preprocessing" class="btn btn-primary" />
+                        <input type="submit" value="Classify" class="btn btn-primary" formaction="/predict" />
+                    </div>
+
+                </form>
+            {% endif %}
+
+
+            <div class="w-50">
+                <form method="post" enctype="multipart/form-data" action="/upload_image">
+                    <div class="form-group">
+                        <input type="file" name="oocyst_file"  class="file" />
+                    </div>
+                </form>
             </div>
 
+            <!--<form method="post" action="/predict">-->
 
-            <div class="form-group row">
-                <label class="col-3 col-form-label">Scale</label>
-                <div class="col-2">
-                    {% if scale is not none %}
-                    <input type="text" name="scale" value="{{scale}}" class="form-control" />
-                    {% else %}
-                    <input type="text" name="scale" class="form-control" />
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="form-group row">
-                <label class="col-3 col-form-label">Segmentation threshold</label>
-                <div class="col-2">
-                    {% if threshold is not none %}
-                    <input type="number" name="threshold" value="{{threshold}}" class="form-control" />
-                    {% else %}
-                    <input type="number" name="threshold" value="150" class="form-control" />
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Preprocessing" class="btn btn-primary" />
-
-                <input type="submit" value="Classify" class="btn btn-primary" formaction="/predict" />
-            </div>
-
-        </form>
-        {% endif %}
-
-
-        <div class="w-50">
-            <form method="post" enctype="multipart/form-data" action="/upload_image">
-                <div class="form-group">
-                    <input type="file" name="oocyst_file"  class="file" />
-                    <!--<label class="custom-file">-->
-                        <!--<input type="file" name="oocyst_file" class="custom-file-input">-->
-                        <!--<span class="custom-file-control"></span>-->
-                    <!--</label>-->
-
-                    <!--<input type="submit" value="Upload image" class="btn btn-primary" />-->
-                </div>
             </form>
-        </div>
 
-        <!--<form method="post" action="/predict">-->
+            {% if similarity is not none and probability is not none %}
+                <div class="form-group">
+                    <h3>Similarity</h3>
+                    <table class="table table-sm table-bordered table-hover w-50">
+                        <colgroup>
+                            <col class="col-md-3">
+                            <col class="col-md-4">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th class="text-right">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in similarity %}
+                                <tr>
+                                    <td>{{item[0]}}</td>
+                                    <td class="text-right">{{'%.4f' % item[1]}}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
 
-        </form>
+                    <h3>Probability</h3>
+                    <table class="table table-sm table-bordered table-hover w-50">
+                        <colgroup>
+                            <col class="col-md-3">
+                            <col class="col-md-4">
+                        </colgroup>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th class="text-right">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in probability %}
+                                <tr>
+                                    <td>{{item[0]}}</td>
+                                    <td class="text-right">{{'%.4f' % item[1]}}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
 
-        {% if similarity is not none and probability is not none %}
-        <div class="form-group">
-            <h3>Similarity</h3>
-            <table class="table table-sm table-bordered table-hover w-50">
-                <colgroup>
-                    <col class="col-md-3">
-                    <col class="col-md-4">
-                </colgroup>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th class="text-right">Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in similarity %}
-                        <tr>
-                            <td>{{item[0]}}</td>
-                            <td class="text-right">{{'%.4f' % item[1]}}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
 
-            <h3>Probability</h3>
-            <table class="table table-sm table-bordered table-hover w-50">
-                <colgroup>
-                    <col class="col-md-3">
-                    <col class="col-md-4">
-                </colgroup>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th class="text-right">Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in probability %}
-                        <tr>
-                            <td>{{item[0]}}</td>
-                            <td class="text-right">{{'%.4f' % item[1]}}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
 
+            </div>
         {% endblock %}
-
-      </div>
-  </body>
+    </body>
 </html>
 
 
