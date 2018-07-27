@@ -7,7 +7,7 @@ This is a pure Python 3 implementation of [COCCIMORPH](http://www.coccidia.icb.u
 ```bash
 $ conda create --name coccimorph python=3.6
 $ source activate coccimorph
-$ pip install -r requirements.txt
+$ pip install cython flask numpy opencv-python pandas scipy tqdm
 ```
 
 Before running the scripts:
