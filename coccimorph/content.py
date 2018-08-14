@@ -291,7 +291,7 @@ class FeatureExtractor:
             vx2[i] = vx_w
             vy2[i] = vy_w
 
-        # compute the simmetry
+        # compute the symmetry
         highX1 = float('-Inf')
         highY1 = float('-Inf')
         highX2 = float('-Inf')
@@ -314,7 +314,7 @@ class FeatureExtractor:
         highX2 += 3
         highY2 += 3
 
-        # create temporal matrices to compute erosion, dilation and rate simmetry
+        # create temporal matrices to compute erosion, dilation and rate symmetry
         ima3a = np.zeros((highX1, highY1))
         ima3b = np.zeros((highX2, highY2))
 
@@ -330,10 +330,11 @@ class FeatureExtractor:
             print('Constraint for max(vx) < highX2 does not hold!')
             print(np.max(self.vx), highX2)
 
-        ima2a = np.zeros((highX1, 500), dtype=np.int)
-        ima2b = np.zeros((highX2, 500), dtype=np.int)
-        ima4a = np.zeros((highX1, 500), dtype=np.int)
-        ima4b = np.zeros((highX2, 500), dtype=np.int)
+        #TODO understand why the +1 and the 500
+        ima2a = np.zeros((highX1+1, 500), dtype=np.int)
+        ima2b = np.zeros((highX2+1, 500), dtype=np.int)
+        ima4a = np.zeros((highX1+1, 500), dtype=np.int)
+        ima4b = np.zeros((highX2+1, 500), dtype=np.int)
 
         for i in range(n):
             ima2a[int(self.vx[i]), int(self.vy[i])] = 1

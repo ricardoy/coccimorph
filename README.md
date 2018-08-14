@@ -59,7 +59,6 @@ E. mitis: 0.4692
 Similarity classification:
 E. acervulina: 71.5685
 E. necatrix: 28.1404
-E. mitis: 7.0517
 
 ```
 
