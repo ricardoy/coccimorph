@@ -8,7 +8,7 @@ import uuid
 
 
 UPLOAD_FOLDER = '/tmp/'
-ALLOWED_EXTENSIONS = set(['bmp', 'tif', 'png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(['bmp', 'png', 'jpg', 'jpeg', 'gif'])
 FOWL = 'FOWL'
 RABBIT = 'RABBIT'
 
@@ -52,26 +52,34 @@ def index():
         session['uid'] = uuid.uuid4()
         app.logger.info('new user: ' + get_full_path())
 
-    if 'filename' not in session:
-        session['filename'] = None
+    # if 'filename' not in session:
+    #     session['filename'] = None
+    #
+    # if 'threshold' not in session:
+    #     session['threshold'] = 150
+    #
+    # if 'species' not in session:
+    #     session['species'] = FOWL
+    #
+    # if 'scale' not in session:
+    #     session['scale'] = 11.
+    #
+    # if 'classification' not in session:
+    #     session['classification'] = None
+    #
+    # if 'similarity' not in session:
+    #     session['similarity'] = None
+    #
+    # if 'probability' not in session:
+    #     session['probability'] = None
 
-    if 'threshold' not in session:
-        session['threshold'] = 150
-
-    if 'species' not in session:
-        session['species'] = FOWL
-
-    if 'scale' not in session:
-        session['scale'] = 11.
-
-    if 'classification' not in session:
-        session['classification'] = None
-
-    if 'similarity' not in session:
-        session['similarity'] = None
-
-    if 'probability' not in session:
-        session['probability'] = None
+    session['filename'] = None
+    session['threshold'] = 150
+    session['species'] = FOWL
+    session['scale'] = 11.
+    session['classification'] = None
+    session['similarity'] = None
+    session['probability'] = None
 
     return render_classify_page()
 

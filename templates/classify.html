@@ -38,7 +38,9 @@
         <!-- optionally uncomment line below for loading your theme assets for a theme like Font Awesome (`fa`) -->
         <!-- script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/themes/fa/theme.min.js"></script -->
         <!-- optionally if you need translation for your language then include  locale file as mentioned below -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/js/locales/LANG.js"></script>
+        <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/js/locales/LANG.js"></script>-->
+
+        <link rel="stylesheet" href={{ url_for('static', filename='style.css') }}>
 
         <title>Coccimorph</title>
     </head>
@@ -56,8 +58,6 @@
 
         <div class="container">
 
-            <h1>Coccimorph</h1>
-
             {% if filename is not none %}
                 <div class="form-group row">
                     <!--<label for="raw">Original</label>-->
@@ -66,8 +66,6 @@
                     <img src="/uploads/bin_{{filename}}?{{suffix}}" alt="binary image"/>
                     <img src="/uploads/seg_{{filename}}?{{suffix}}" alt="segmented image"/>
                 </div>
-
-
 
                 <form method="post" action="/preproc">
                     <div class="form-group row">
@@ -101,9 +99,9 @@
                         <label class="col-3 col-form-label">Segmentation threshold</label>
                         <div class="col-2">
                             {% if threshold is not none %}
-                                <input type="number" name="threshold" value="{{threshold}}" class="form-control" />
+                                <input type="number" name="threshold" value="{{threshold}}" class="form-control" onchange="this.form.submit()" />
                             {% else %}
-                                <input type="number" name="threshold" value="150" class="form-control" />
+                                <input type="number" name="threshold" value="150" class="form-control" onchange="this.form.submit()" />
                             {% endif %}
                         </div>
                     </div>
