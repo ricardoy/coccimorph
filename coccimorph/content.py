@@ -330,11 +330,11 @@ class FeatureExtractor:
             print('Constraint for max(vx) < highX2 does not hold!')
             print(np.max(self.vx), highX2)
 
-        #TODO understand why the +1 and the 500
-        ima2a = np.zeros((highX1+1, 500), dtype=np.int)
-        ima2b = np.zeros((highX2+1, 500), dtype=np.int)
-        ima4a = np.zeros((highX1+1, 500), dtype=np.int)
-        ima4b = np.zeros((highX2+1, 500), dtype=np.int)
+        #TODO write a better bound for the images dimensions
+        ima2a = np.zeros((highX1*2, 500), dtype=np.int)
+        ima2b = np.zeros((highX2*2, 500), dtype=np.int)
+        ima4a = np.zeros((highX1*2, 500), dtype=np.int)
+        ima4b = np.zeros((highX2*2, 500), dtype=np.int)
 
         for i in range(n):
             ima2a[int(self.vx[i]), int(self.vy[i])] = 1
