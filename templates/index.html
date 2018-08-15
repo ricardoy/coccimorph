@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">-->
+
+
+        <!-- bootstrap 4.x is supported. You can also use the bootstrap css 3.3.x versions -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css" />
+        <!-- if using RTL (Right-To-Left) orientation, load the RTL CSS file after fileinput.css by uncommenting below -->
+        <!-- link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/css/fileinput-rtl.min.css" media="all" rel="stylesheet" type="text/css" /-->
+        <!-- optionally uncomment line below if using a theme or icon set like font awesome (note that default icons used are glyphicons and `fa` theme can override it) -->
+        <!-- link https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css media="all" rel="stylesheet" type="text/css" /-->
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <!-- piexif.min.js is only needed for restoring exif data in resized images and when you
+            wish to resize images before upload. This must be loaded before fileinput.min.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/js/plugins/piexif.min.js" type="text/javascript"></script>
+        <!-- sortable.min.js is only needed if you wish to sort / rearrange files in initial preview.
+            This must be loaded before fileinput.min.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/js/plugins/sortable.min.js" type="text/javascript"></script>
+        <!-- purify.min.js is only needed if you wish to purify HTML content in your preview for
+            HTML files. This must be loaded before fileinput.min.js -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/js/plugins/purify.min.js" type="text/javascript"></script>
+        <!-- popper.min.js below is needed if you use bootstrap 4.x. You can also use the bootstrap js
+           3.3.x versions without popper.min.js. -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js"></script>
+        <!-- bootstrap.min.js below is needed if you wish to zoom and preview file content in a detail modal
+            dialog. bootstrap 4.x is supported. You can also use the bootstrap js 3.3.x versions. -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" type="text/javascript"></script>
+        <!-- the main fileinput plugin file -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/js/fileinput.min.js"></script>
+        <!-- optionally uncomment line below for loading your theme assets for a theme like Font Awesome (`fa`) -->
+        <!-- script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/themes/fa/theme.min.js"></script -->
+        <!-- optionally if you need translation for your language then include  locale file as mentioned below -->
+        <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-fileinput/4.4.5/js/locales/LANG.js"></script>-->
+
+        <link rel="stylesheet" href={{ url_for('static', filename='style.css') }}>
+
+        <title>Coccimorph</title>
+    </head>
+    <body>
+        <!-- Optional JavaScript -->
+        <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
+
+
+        {% block body %}
+
+        <!--<h3>User id: {{uid}}</h3>-->
+
+        <div class="container">
+
+            <div class="row">
+                <div class="col-sm-1">
+                    <a href="http://www.coccidia.icb.usp.br/">
+                        <img src="{{ url_for('static', filename='logolbm.jpg') }}"
+                             alt="" height="105" width="50" align="middle" border="1">
+                    </a>
+                </div>
+
+                <div class="col-sm-10">
+                    <h1 align="center">COCCIMORPH</h1>
+                    <h2 align="center">Remote Diagnosis System</h2>
+                </div>
+
+                <div class="col-sm-1">
+                    <a href="http://cyvision.ifsc.usp.br/">
+                        <img src="{{ url_for('static', filename='icncvrglogo.jpg') }}"
+                             alt="" height="100" width="92" align="middle" border="1">
+                    </a>
+                </div>
+            </div>
+
+
+
+
+            <p>
+                Welcome to COCCIMORPH. This front end allows you to discriminate Eimeria species using oocyst images. In the current version, the system can only discriminate Eimeria species of domestic fowl. We intend to extend its applicability to other parasites in the next future.
+            </p>
+
+            <p>
+                COCCIMORPH is a collaborative research work developed by the Laboratory of Molecular Biology of Coccidia at the Departament of Parasitology of the Institute of Biomedical Sciences in São Paulo, and the Cybernetic Vision Research Group, at the Institute of Physics in São Carlos, University of São Paulo.
+            </p>
+
+
+            <p>Research Team:</p>
+
+            <ul>
+                <li>
+                    <a href="https://www.ime.usp.br/~cbeltran/">César Armando Beltrán Castañón</a>
+                </li>
+                <li>
+                    Jane Silveira Fraga
+                </li>
+                <li>
+                    Sandra Fernandez
+                </li>
+                <li>
+                    <a href="http://cyvision.if.sc.usp.br/~luciano/">Prof. Luciano da Fontoura Costa</a>
+                </li>
+                <li>
+                    <a href="http://www.coccidia.icb.usp.br/docentes/arthur/index.php3">Prof. Arthur Gruber</a>
+                </li>
+            </ul>
+
+
+
+
+
+
+
+            <p>
+                Coccimorph is now running on a new Python implementation of the system. This version was developed by Ricardo Yamamoto Abe.
+            </p>
+
+
+            <p>
+                Go to  <a href="/coccimorph">COCCIMORPH's</a> discrimination page
+            </p>
+
+
+
+
+
+
+        </div>
+        {% endblock %}
+    </body>
+</html>
+
+
+
+

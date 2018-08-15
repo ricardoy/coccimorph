@@ -58,6 +58,20 @@
 
         <div class="container">
 
+            <p>
+                Welcome to COCCIMORPH's discrimination page.
+            </p>
+
+            <p>
+                Coccimorph is now running on a new Python implementation of the system.
+                This version was developed by Ricardo Yamamoto Abe.
+            </p>
+
+            <p>
+                Please read the <a href="http://www.coccidia.icb.usp.br/uploadoocyst/coccimorph/tutorials/Tutorial-1-On-Line-Diagnosis.pdf">instructions</a> before using the program.
+            </p>
+
+
             {% if filename is not none %}
                 <div class="form-group row">
                     <!--<label for="raw">Original</label>-->
@@ -175,7 +189,35 @@
                 </div>
             {% endif %}
 
+            <p>
+                NOTE : For experimental tests (please see <a href="http://www.coccidia.icb.usp.br/uploadoocyst/coccimorph/tutorials/Tutorial-1-On-Line-Diagnosis.pdf">instructions</a>), you can download our sets of images:
+            </p>
 
+            <ul>
+                <li>
+                    <a href="http://www.coccidia.icb.usp.br/uploadoocyst/coccimorph/tutorials/SevenSpeciesFowl.zip">
+                        Download a set of different Eimeria species of domestic fowl
+                    </a>
+                </li>
+
+                <li>
+                    <a href="http://www.coccidia.icb.usp.br/uploadoocyst/coccimorph/tutorials/ElevenSpeciesRabbit.zip">
+                        Download a set of different Eimeria species of domestic rabbit
+                    </a>
+                </li>
+
+                <li>
+                    <a href="http://www.coccidia.icb.usp.br/uploadoocyst/coccimorph/tutorials/CaptureChangesFowl.zip">
+                        Download a set of images acquired under different conditions (not documented yet)
+                    </a>
+                </li>
+
+                <li>
+                    <a href="http://www.coccidia.icb.usp.br/uploadoocyst/coccimorph/classification/classification.html">
+                        A comparison between different classifiers (not documented yet)
+                    </a>
+                </li>
+            </ul>
 
             </div>
         {% endblock %}

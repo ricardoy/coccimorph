@@ -27,6 +27,10 @@ def get_full_path():
     return os.path.join(app.config['UPLOAD_FOLDER'], str(session['uid']))
 
 
+def render_index_page():
+    return render_template('index.html')
+
+
 def render_classify_page():
     return render_template('classify.html',
                            filename=session['filename'],
@@ -41,13 +45,18 @@ def render_classify_page():
                            )
 
 
+@app.route('/')
+def index():
+    return render_index_page()
+
+
 @app.route('/uploads/<filename>')
 def send_file(filename):
     return send_from_directory(get_full_path(), filename)
 
 
-@app.route('/')
-def index():
+@app.route('/coccimorph')
+def main():
     if 'uid' not in session:
         session['uid'] = uuid.uuid4()
         app.logger.info('new user: ' + get_full_path())
